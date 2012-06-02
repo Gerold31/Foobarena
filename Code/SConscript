@@ -12,6 +12,6 @@ if sys.platform=="win32":
 elif sys.platform=="linux2":
     # The LinkerScript is required to make sure that the game DLL only exports the GetGame() symbol (like a Windows DLL),
     # rather than *all* sorts of symbols whose name strings don't need to appear in the final DSO.
-    gameEnv.Append(LINKFLAGS = ["-Wl,--version-script=Games/Strand3d/Code/LinkerScript"])
+    gameEnv.Append(LINKFLAGS = ["-Wl,--version-script=Games/Foobarena/Code/LinkerScript"])
 
-gameEnv.SharedLibrary("Strand3d", Glob("*.cpp")+Split("Libs/LookupTables.cpp Libs/Physics.cpp"))
+gameEnv.SharedLibrary("Foobarena", Glob("*.cpp")+Split("Libs/LookupTables.cpp Libs/Physics.cpp"))

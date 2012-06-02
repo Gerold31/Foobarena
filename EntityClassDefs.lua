@@ -1,4 +1,4 @@
--- Let Strand3d maps be up to 131072 (65536*2) units big in each direction. This corresponds to a side length of 3329,23 km.
+-- Let Foobarena maps be up to 131072 (65536*2) units big in each direction. This corresponds to a side length of 3329,23 km.
 -- Note: If this gets any bigger than 65536, CaWE needs revision, especially cmap brush loading (starting digging from LoadSave_cmap.cpp)!
 Mapsize={ -65536, 65536 }
 
@@ -215,7 +215,7 @@ EntityClassDefs["speaker"]=newEntClassDef(Common, Angles,
     soundshader=
     {
         type       ="string";
-        description="Name of sound shader or file for playback, e.g. Games/Strand3d/Sounds/jungle.wav";
+        description="Name of sound shader or file for playback, e.g. Games/Foobarena/Sounds/jungle.wav";
         value      ="";
     };
 

@@ -122,7 +122,7 @@ EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
     // This would be the proper way to do it, but we don't know here whether this is the local human player of a client.
     // (Could also be the entity of another (remote) client, or a server-side entity.)
     // Note that if (is local human player) is true, cf::GuiSys::GuiMan!=NULL is implied to be true, too.
-    // GuiHUD=(is local human player) ? cf::GuiSys::GuiMan->Find("Games/Strand3d/GUIs/HUD.cgui", true) : NULL;
+    // GuiHUD=(is local human player) ? cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/HUD.cgui", true) : NULL;
 
 
     assert(CollisionModel==NULL);
@@ -772,7 +772,7 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
 
         // This is a compromise for the not-so-great code in the constructor:
         // Obtain a pointer to our GUI if we haven't one already (so this is a one-time issue).
-        if (GuiHUD==NULL) GuiHUD=cf::GuiSys::GuiMan->Find("Games/Strand3d/GUIs/HUD_main.cgui", true);
+        if (GuiHUD==NULL) GuiHUD=cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/HUD_main.cgui", true);
 
         // Decide whether the GuiHUD should be drawn at all.
         const bool ActivateHUD=State.StateOfExistance==StateOfExistance_Alive || State.StateOfExistance==StateOfExistance_Dead;

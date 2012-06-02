@@ -201,9 +201,9 @@ ScriptStateT::ScriptStateT()
     // but as it also contains default values of the properties of concrete entities
     // (including e.g. the "CppClass" key, which allows us to learn the C++ class name from the entity class name),
     // it makes very much sense to also load that script here!
-    if (luaL_loadfile(LuaState, "Games/Strand3d/EntityClassDefs.lua")!=0 || lua_pcall(LuaState, 0, 0, 0)!=0)
+    if (luaL_loadfile(LuaState, "Games/Foobarena/EntityClassDefs.lua")!=0 || lua_pcall(LuaState, 0, 0, 0)!=0)
     {
-        Console->Warning("Lua script \"Games/Strand3d/EntityClassDefs.lua\" could not be loaded\n");
+        Console->Warning("Lua script \"Games/Foobarena/EntityClassDefs.lua\" could not be loaded\n");
         Console->Print(std::string("(")+lua_tostring(LuaState, -1)+").\n");
         lua_pop(LuaState, 1);
     }

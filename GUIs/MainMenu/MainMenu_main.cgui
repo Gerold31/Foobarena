@@ -1,4 +1,4 @@
-dofile("Games/Strand3d/GUIs/MainMenu/MainMenu_init.cgui");
+dofile("Games/Foobarena/GUIs/MainMenu/MainMenu_init.cgui");
 
 function MainMenu:OnKeyPress(Key)
     if (Key==1) then    -- Key number 1 is the ESC key.

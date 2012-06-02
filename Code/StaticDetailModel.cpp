@@ -159,12 +159,12 @@ EntStaticDetailModelT::EntStaticDetailModelT(const EntityCreateParamsT& Params)
         }
         else if (Key=="model")
         {
-            m_Model=GameWorld->GetModel(std::string("Games/Strand3d/")+Value);
+            m_Model=GameWorld->GetModel(std::string("Games/Foobarena/")+Value);
         }
         else if (Key=="sequence") m_SequNr=atoi(Value.c_str());    // Note that the "sequence" key is NOT guaranteed to come after the "model" key!
         else if (Key=="gui"     )
         {
-            GuiName=std::string("Games/Strand3d/")+Value;
+            GuiName=std::string("Games/Foobarena/")+Value;
 
             // Load the Gui. Note that this is done BOTH on the client as well as on the server.
             assert(cf::GuiSys::GuiMan!=NULL);

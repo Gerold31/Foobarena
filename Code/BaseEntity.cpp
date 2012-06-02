@@ -152,7 +152,7 @@ BaseEntityT::BaseEntityT(const EntityCreateParamsT& Params, const EntityStateT& 
             }
             else
             {
-                CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Strand3d/"+It->second);
+                CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+It->second);
             }
         }
     }

@@ -103,7 +103,7 @@ void cf::GameSys::GameImplT::Initialize(bool AsClient, bool AsServer, ModelManag
         // but also to effectively load and initialize the models only at that later time, what might be very expensive, too!
         {
             // And the rest. Observe that static detail models are NOT mentioned (how could they?).
-   //         ModelMan.GetModel("Games/Strand3d/Models/Items/Ammo_DartGun/Ammo_DartGun.cmdl");
+   //         ModelMan.GetModel("Games/Foobarena/Models/Items/Ammo_DartGun/Ammo_DartGun.cmdl");
 
         }
 
