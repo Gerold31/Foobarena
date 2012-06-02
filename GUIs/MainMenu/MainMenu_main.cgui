@@ -1,0 +1,92 @@
+dofile("Games/Strand3d/GUIs/MainMenu/MainMenu_init.cgui");
+
+function MainMenu:OnKeyPress(Key)
+    if (Key==1) then    -- Key number 1 is the ESC key.
+        if (Info:get("text")=="ingame") then
+            -- Pressing ESC while we're "in-game" just returns us to the game.
+            
+			gui:activate      (true);
+			gui:setInteractive(true);
+			gui:showMouse     (true);
+			Info:set("text", "menu");
+        else
+            self:Quit()
+        end
+        return true;    -- Return true to indicate that we processed this key press.
+    end
+
+    return false;       -- Return false to indicate that we did not process this key press.
+end
+
+function ButtonQuit:OnMouseEnter()
+	self:set("borderColor", 1, 0, 0, 1);
+	--self:set("text", ">Quit");
+end
+
+function ButtonQuit:OnMouseLeave()
+	self:set("borderColor", 0, 0, 0, 1);
+	--self:set("text", "Quit");
+end
+
+function ButtonQuit:OnMouseButtonUp()
+	MainMenu:Quit()
+    return true;
+end
+
+
+function ButtonLoadMap:OnMouseEnter()
+	self:set("borderColor", 1, 0, 0, 1);
+	-- self:set("text", ">Quit");
+end
+
+function ButtonLoadMap:OnMouseLeave()
+	self:set("borderColor", 0, 0, 0, 1);
+	-- self:set("text", "Quit");
+end
+
+function ButtonLoadMap:OnMouseButtonUp()
+    -- Avoid that this function is called again (re-entrancy) during its wait() below.
+
+    
+    gui:thread(MainMenu.StartNewGame, "Arena");
+    return true;
+end
+
+function MainMenu:Quit()
+	--if (self.IsShuttingDown) then return true; end;
+    --self.IsShuttingDown=true;
+
+    ci.RunCommand("quit=true;");
+end
+
+function MainMenu:StartNewGame(WorldName)
+    waitFrame();
+
+    -- Start the server.
+    -- Also stop any background music - the client will start new music once the level has been loaded
+    -- by calling the function StartLevelIntroMusic() in the console, which is defined in "config.lua".
+ --   ci.RunCommand("MusicStop();");
+	ci.RunCommand("changeLevel('Arena');");
+
+    -- Undo showing the "Initializing Server..." and hiding the New Game dialog.
+ --   NewGameDialog:set("show", true);
+--    InitServerInfoPanel:set("show", false);
+
+ --   if (MainMenu.ServerState~="maploaded") then return; end  -- TODO: Output error message!
+
+
+    -- Connect the client, but not to "clRemoteName:clRemotePort", but to "localhost:svPortNr"!
+    -- This is the same as connecting the client to a listen server game.
+--    ci.RunCommand("connect('localhost', "..ci.GetValue("dlg_svPortNr")..");");  -- How do and can we deal with failure here??
+
+--    NewGameDialog:set("show", false);
+--    gui:setFocus(NormalControls);
+
+    gui:activate      (false);
+    gui:setInteractive(false);
+    gui:showMouse     (false);
+	Info:set("text", "ingame");
+--	self:Quit();
+	--self.ClientState="ingame";
+	
+end
