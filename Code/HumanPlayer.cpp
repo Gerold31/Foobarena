@@ -51,6 +51,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include <cstdio>
 #include <string.h>
+#include <cmath>
 
 #ifndef _WIN32
 #define _stricmp strcasecmp
@@ -325,8 +326,9 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 VectorT             WishVelocity;
                 bool                WishJump=false;
-                const double        VelX    =6000.0*LookupTables::Angle16ToSin[State.Heading];     // 6000 == Client.MoveSpeed
-                const double        VelY    =6000.0*LookupTables::Angle16ToCos[State.Heading];     // 6000 == Client.MoveSpeed
+				const double 		PlayerSpeed = 6000.0;
+                const double        VelX    =PlayerSpeed*LookupTables::Angle16ToSin[State.Heading];     // 6000 == Client.MoveSpeed
+                const double        VelY    =PlayerSpeed*LookupTables::Angle16ToCos[State.Heading];     // 6000 == Client.MoveSpeed
                 const unsigned long Keys    =PlayerCommands[PCNr].Keys;
 
                 if (Keys & PCK_MoveForward ) WishVelocity=             VectorT( VelX,  VelY, 0);
@@ -370,6 +372,15 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                     VectorT XYVel      =State.Velocity; XYVel.z=0;
                     double  OldSpeed   =length(XYVel);
                     bool    OldWishJump=(State.Flags & Flags_OldWishJump) ? true : false;
+					
+					
+					if(WishVelocity.GetLengthSqr() > 0)
+					{
+						// normalize Vector
+						WishVelocity /= sqrt(WishVelocity.GetLengthSqr());
+						WishVelocity *= PlayerSpeed;
+					}
+					
 
                     Physics::MoveHuman(State, ClipModel, PlayerCommands[PCNr].FrameTime, WishVelocity, WishVelLadder, WishJump, OldWishJump, 470.0, GameWorld->GetClipWorld());
 
