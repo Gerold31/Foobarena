@@ -28,7 +28,6 @@ MainMenu:AddChild(ButtonQuit);
 MainMenu:AddChild(ButtonLoadMap);
 MainMenu:AddChild(Info);
 
-
 -- Initialization of the window contents ("constructor code").
 -- ***********************************************************
 
@@ -43,6 +42,9 @@ function MainMenu:OnInit()
     gui:activate      (true);
     gui:setInteractive(true);
     gui:showMouse     (true);
+	gui:setFocus	  (MainMenu);
+	
+    Info:set("show", true);
 end
 
 function ButtonQuit:OnInit()
@@ -70,7 +72,7 @@ function Info:OnInit()
     self:set("backColor", 0, 0, 0, 0.5);
     self:set("borderWidth", 5);
     self:set("borderColor", 1, 0, 0, 0);
-    self:set("text", "Load Map");
+    self:set("text", "");
     self:set("textColor", 1, 1, 1, 1);
 end
 

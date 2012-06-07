@@ -20,6 +20,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 */
 
 #include "GameImpl.hpp"
+#include "Libs/LookupTables.hpp"
 #include "../../BaseEntity.hpp"     // Just for the one-time init of the TypeInfoMan.
 
 #include "ClipSys/CollisionModelMan.hpp"
@@ -156,6 +157,8 @@ DLL_EXPORT cf::GameSys::GameI* __stdcall GetGame(
 #endif
         ConVarsAreRegistered=true;
 
+		// More "random" init-once stuff follows...  TODO: Move this into GameI::Initialize() ??????
+        LookupTables::Initialize();
         GetBaseEntTIM().Init();     // Mis-use the ConVarsAreRegistered var to init the TIM exactly once...
     }
 

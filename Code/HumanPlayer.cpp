@@ -24,6 +24,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 /***************************/
 
 #include "HumanPlayer.hpp"
+#include "InfoPlayerStart.hpp"
 #include "StaticDetailModel.hpp"
 #include "EntityCreateParams.hpp"
 #include "GameImpl.hpp"
@@ -167,6 +168,17 @@ void EntHumanPlayerT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT
 
 void EntHumanPlayerT::ProcessConfigString(const void* ConfigData, const char* ConfigString)
 {
+         if (strcmp(ConfigString, "PlayerCommand")==0) PlayerCommands.PushBack(*((PlayerCommandT*)ConfigData));
+    else if (strcmp(ConfigString, "IsAlive?"     )==0) *((bool*)ConfigData)=(State.StateOfExistance==StateOfExistance_Alive);
+    else if (strcmp(ConfigString, "PlayerName"   )==0) strncpy(State.PlayerName, (const char*)ConfigData, sizeof(State.PlayerName));
+    else if (strcmp(ConfigString, "ModelName"    )==0)
+    {
+        State.ModelIndex=0;
+    }
+
+    // player name
+    // model name
+    // noclip
 }
 
 
@@ -630,11 +642,173 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
             case StateOfExistance_Dead:
             {
+                bool         DummyOldWishJump=false;
+                const double OldOriginZ      =State.Origin.z;
+                const float  OldModelFrameNr =State.ModelFrameNr;
+
+                if (m_RigidBody->isInWorld())
+                    PhysicsWorld->RemoveRigidBody(m_RigidBody);
+
+                Physics::MoveHuman(State, ClipModel, PlayerCommands[PCNr].FrameTime, VectorT(), VectorT(), false, DummyOldWishJump, 0.0, GameWorld->GetClipWorld());
+
+                // We want to lower the view of the local client after it has been killed (in order to indicate the body collapse).
+                // Unfortunately, the problem is much harder than just decreasing the 'State.Origin.z' in some way, because
+                // a) other clients still need the original height for properly drawing the death sequence (from 3rd person view), and
+                // b) the corpse that we create on leaving this StateOfExistance must have the proper height, too.
+                // Therefore, we decrease the 'State.Origin.z', but "compensate" the 'State.Dimensions', such that the *absolute*
+                // coordinates of our bounding box (obtained by "State.Origin plus State.Dimensions") remain constant.
+                // This way, we can re-derive the proper height in both cases a) and b).
+                const double Collapse=2000.0*PlayerCommands[PCNr].FrameTime;
+
+                if (State.Dimensions.Min.z+Collapse<-100.0)
+                {
+                    State.Origin.z        -=Collapse;
+                    State.Dimensions.Min.z+=Collapse;
+                    State.Dimensions.Max.z+=Collapse;
+                    State.Bank            +=(unsigned short)(PlayerCommands[PCNr].FrameTime*36000.0);
+                }
+
+                // Advance frame time of model sequence.
+				/*
+                const CafuModelT*                PlayerModel=cf::GameSys::GameImplT::GetInstance().GetPlayerModel(State.ModelIndex);
+                IntrusivePtrT<AnimExprStandardT> StdAE      =PlayerModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr);
+
+                StdAE->SetForceLoop(false);
+                StdAE->AdvanceTime(PlayerCommands[PCNr].FrameTime);
+                State.ModelFrameNr=StdAE->GetFrameNr();
+				*/
+				
+                // We entered this state after we died.
+                // Now leave it only after we have come to a complete halt, and the death sequence is over.
+                if (OldOriginZ>=State.Origin.z && fabs(State.Velocity.x)<0.1 && fabs(State.Velocity.y)<0.1 && fabs(State.Velocity.z)<0.1 && OldModelFrameNr==State.ModelFrameNr)
+                {
+                    if (ThinkingOnServerSide)
+                    {
+                        std::map<std::string, std::string> Props; Props["classname"]="corpse";
+
+                        // Create a new "corpse" entity in the place where we died, or else the model disappears.
+                        unsigned long CorpseID=GameWorld->CreateNewEntity(Props, ServerFrameNr, VectorT());
+
+                        if (CorpseID!=0xFFFFFFFF)
+                        {
+                            BaseEntityT* Corpse=GameWorld->GetBaseEntityByID(CorpseID);
+
+                            Corpse->State=EntityStateT(State.Origin+VectorT(0.0, 0.0, State.Dimensions.Min.z+1728.8), VectorT(), BoundingBox3T<double>(Vector3dT()), State.Heading,
+                                                       0, 0, 0, 0, State.ModelIndex, State.ModelSequNr, State.ModelFrameNr, 0, 0, 0, 0,
+                                                       State.ActiveWeaponSlot, 0, 0.0);
+                        }
+                    }
+
+                    State.Velocity.y=State.Heading;
+                    State.Velocity.z=State.Bank;
+                    State.Dimensions=BoundingBox3T<double>(VectorT(400.0, 400.0, 100.0), VectorT(-400.0, -400.0, -1728.8));
+                    State.StateOfExistance=StateOfExistance_FrozenSpectator;
+                }
                 break;
             }
 
             case StateOfExistance_FrozenSpectator:
             {
+				const float Pi          =3.14159265359f;
+                const float SecPerSwing =15.0f;
+                float       PC_FrameTime=PlayerCommands[PCNr].FrameTime;
+
+                if (m_RigidBody->isInWorld())
+                    PhysicsWorld->RemoveRigidBody(m_RigidBody);
+
+                // In this 'StateOfExistance' is the 'State.Velocity' unused - thus mis-use it for other purposes!
+                if (PC_FrameTime>0.05) PC_FrameTime=0.05f;  // Avoid jumpiness with very low FPS.
+                State.Velocity.x+=PC_FrameTime*2.0*Pi/SecPerSwing;
+                if (State.Velocity.x>6.3) State.Velocity.x-=2.0*Pi;
+
+                const float SwingAngle=float(sin(State.Velocity.x)*200.0);
+
+                State.Heading=(unsigned short)(State.Velocity.y+SwingAngle);
+                State.Bank   =(unsigned short)(State.Velocity.z-SwingAngle);
+
+                // TODO: We want the player to release the button between respawns in order to avoid permanent "respawn-flickering"
+                //       that otherwise may occur if the player keeps the button continuously pressed down.
+                //       These are the same technics that also apply to the "jump"-button.
+                if ((PlayerCommands[PCNr].Keys & PCK_Fire1)==0) break;  // "Fire" button not pressed.
+
+                const ArrayT<unsigned long>& AllEntityIDs=GameWorld->GetAllEntityIDs();
+                BaseEntityT*                 IPSEntity   =NULL;
+                VectorT                      OurNewOrigin;
+                unsigned long                EntityIDNr;
+
+                // The "Fire"-button was pressed. Now try to determine a free "InfoPlayerStart" entity for respawning there.
+                for (EntityIDNr=0; EntityIDNr<AllEntityIDs.Size(); EntityIDNr++)
+                {
+                    IPSEntity=GameWorld->GetBaseEntityByID(AllEntityIDs[EntityIDNr]);
+                    if (IPSEntity==NULL) continue;
+
+                    if (IPSEntity->GetType()!=&EntInfoPlayerStartT::TypeInfo) continue;
+
+                    // This is actually an "InfoPlayerStart" entity. Now try to put our own bounding box at the origin of 'IPSEntity',
+                    // but try to correct/choose the height such that we are on ground (instead of hovering above it).
+                    OurNewOrigin=IPSEntity->State.Origin;
+
+                    // First, create a BB of dimensions (-300.0, -300.0, -100.0) - (300.0, 300.0, 100.0).
+                    const BoundingBox3T<double> ClearingBB(VectorT(State.Dimensions.Min.x, State.Dimensions.Min.y, -State.Dimensions.Max.z), State.Dimensions.Max);
+
+                    // Move ClearingBB up to a reasonable height (if possible!), such that the *full* BB (that is, State.Dimensions) is clear of (not stuck in) solid.
+                    cf::ClipSys::TraceResultT Result(1.0);
+                    GameWorld->GetClipWorld().TraceBoundingBox(ClearingBB, OurNewOrigin, VectorT(0.0, 0.0, 3000.0), MaterialT::Clip_Players, &ClipModel, Result);
+                    const double AddHeight=3000.0*Result.Fraction;
+
+                    // Move ClearingBB down as far as possible.
+                    Result=cf::ClipSys::TraceResultT(1.0);
+                    GameWorld->GetClipWorld().TraceBoundingBox(ClearingBB, OurNewOrigin+VectorT(0.0, 0.0, AddHeight), VectorT(0.0, 0.0, -999999.0), MaterialT::Clip_Players, &ClipModel, Result);
+                    const double SubHeight=999999.0*Result.Fraction;
+
+                    // Beachte: Hier für Epsilon 1.0 (statt z.B. 1.23456789) zu wählen hebt u.U. GENAU den (0 0 -1) Test in
+                    // Physics::CategorizePosition() auf! Nicht schlimm, wenn aber auf Client-Seite übers Netz kleine Rundungsfehler
+                    // vorhanden sind (es werden floats übertragen, nicht doubles!), kommt CategorizePosition() u.U. auf Client- und
+                    // Server-Seite zu verschiedenen Ergebnissen! Der Effekt spielt sich zwar in einem Intervall der Größe 1.0 ab,
+                    // kann mit OpenGL aber zu deutlichem Pixel-Flimmern führen!
+                    OurNewOrigin.z=OurNewOrigin.z+AddHeight-SubHeight+(ClearingBB.Min.z-State.Dimensions.Min.z/*1628.8*/)+1.23456789/*Epsilon (sonst Ruckeln am Anfang!)*/;
+
+                    // Old, deprecated code (can get us stuck in non-level ground).
+                    // const double HeightAboveGround=GameWorld->MapClipLine(OurNewOrigin, VectorT(0, 0, -1.0), 0, 999999.9);
+                    // OurNewOrigin.z=OurNewOrigin.z-HeightAboveGround-State.Dimensions.Min.z+1.23456789/*Epsilon (needed to avoid ruggy initial movement!)*/;
+
+
+                    BoundingBox3T<double> OurBB(State.Dimensions);
+
+                    OurBB.Min+=OurNewOrigin;
+                    OurBB.Max+=OurNewOrigin;
+
+                    ArrayT<cf::ClipSys::ClipModelT*> ClipModels;
+                    GameWorld->GetClipWorld().GetClipModelsFromBB(ClipModels, MaterialT::Clip_Players, OurBB);
+
+                    if (ClipModels.Size()==0) break;
+                }
+
+                if (EntityIDNr>=AllEntityIDs.Size()) break;     // No suitable "InfoPlayerStart" entity found!
+
+                // Respawn!
+                State.Origin             =OurNewOrigin;
+                State.Velocity           =VectorT();
+                State.Dimensions         =BoundingBox3T<double>(VectorT(400.0, 400.0, 100.0), VectorT(-400.0, -400.0, -1728.8));
+                State.Heading            =IPSEntity->State.Heading;
+                State.Pitch              =0;
+                State.Bank               =0;
+                State.StateOfExistance   =StateOfExistance_Alive;
+                State.ModelSequNr        =0;
+                State.ModelFrameNr       =0.0;
+                State.Health             =100;
+                State.Armor              =0;
+                State.HaveItems          =0;
+                State.HaveWeapons        =0;
+                State.ActiveWeaponSlot   =0;
+                State.ActiveWeaponSequNr =0;
+                State.ActiveWeaponFrameNr=0.0;
+
+                ClipModel.SetOrigin(State.Origin);
+                ClipModel.Register();
+
+                for (char Nr=0; Nr<15; Nr++) State.HaveAmmo         [Nr]=0;   // IMPORTANT: Do not clear the frags value in 'HaveAmmo[AMMO_SLOT_FRAGS]'!
+                for (char Nr=0; Nr<32; Nr++) State.HaveAmmoInWeapons[Nr]=0;
                 break;
             }
 
@@ -787,6 +961,7 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
         // for now to just do it in this place and in this way...
         if (GuiHUD!=NULL && ActivateHUD)
         {
+			GuiHUD->CallLuaFunc("UpdateCrosshairMaterial", "s", "Gui/CrossHair1");
 
         }
 

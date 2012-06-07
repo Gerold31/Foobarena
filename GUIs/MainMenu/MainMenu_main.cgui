@@ -1,21 +1,49 @@
 dofile("Games/Foobarena/GUIs/MainMenu/MainMenu_init.cgui");
 
+function MainMenu:UpdateUI(WhoChangedState)
+    -- Note that early during initialization, self.ClientState and self.ServerState can be nil.
+    if (self.ClientState==nil) then self.ClientState="idle"; end
+    if (self.ServerState==nil) then self.ServerState="idle"; end
+	
+	
+    if (WhoChangedState=="cl" and self.ClientState=="ingame") then
+        -- The client just changed into the "ingame" state,
+        -- which is a good occasion to hide the main menu.
+        gui:close();
+    end
+end
+
+function OnClientStateChanged(NewState)
+    -- print("Cl State: " .. NewState);
+    MainMenu.ClientState=NewState;
+
+    MainMenu:UpdateUI("cl");
+end
+
+-- This function is called by the server whenever its state changed.
+function OnServerStateChanged(NewState)
+    -- print("Sv State: " .. NewState);
+    MainMenu.ServerState=NewState;
+
+    MainMenu:UpdateUI("sv");
+end
+
 function MainMenu:OnKeyPress(Key)
     if (Key==1) then    -- Key number 1 is the ESC key.
-        if (Info:get("text")=="ingame") then
+        if (self.ClientState=="ingame") then
             -- Pressing ESC while we're "in-game" just returns us to the game.
-            
-			gui:activate      (true);
-			gui:setInteractive(true);
-			gui:showMouse     (true);
-			Info:set("text", "menu");
+            gui:close();
         else
-            self:Quit()
+            MainMenu.Quit();
         end
         return true;    -- Return true to indicate that we processed this key press.
     end
 
     return false;       -- Return false to indicate that we did not process this key press.
+end
+
+function MainMenu:OnFrame()
+	Info:set("text", self.ClientState);
 end
 
 function ButtonQuit:OnMouseEnter()
@@ -48,7 +76,7 @@ function ButtonLoadMap:OnMouseButtonUp()
     -- Avoid that this function is called again (re-entrancy) during its wait() below.
 
     
-    gui:thread(MainMenu.StartNewGame, "Arena");
+    gui:thread(StartNewGame, "Arena");
     return true;
 end
 
@@ -59,32 +87,32 @@ function MainMenu:Quit()
     ci.RunCommand("quit=true;");
 end
 
-function MainMenu:StartNewGame(WorldName)
+function StartNewGame(WorldName)
     waitFrame();
 
     -- Start the server.
     -- Also stop any background music - the client will start new music once the level has been loaded
     -- by calling the function StartLevelIntroMusic() in the console, which is defined in "config.lua".
  --   ci.RunCommand("MusicStop();");
-	ci.RunCommand("changeLevel('Arena');");
+    ci.RunCommand("changeLevel('"..WorldName.."');");
 
     -- Undo showing the "Initializing Server..." and hiding the New Game dialog.
  --   NewGameDialog:set("show", true);
 --    InitServerInfoPanel:set("show", false);
 
- --   if (MainMenu.ServerState~="maploaded") then return; end  -- TODO: Output error message!
+    if (MainMenu.ServerState~="maploaded") then return; end  -- TODO: Output error message!
 
 
     -- Connect the client, but not to "clRemoteName:clRemotePort", but to "localhost:svPortNr"!
     -- This is the same as connecting the client to a listen server game.
---    ci.RunCommand("connect('localhost', "..ci.GetValue("dlg_svPortNr")..");");  -- How do and can we deal with failure here??
+    ci.RunCommand("connect('localhost', "..ci.GetValue("dlg_svPortNr")..");");  -- How do and can we deal with failure here??
 
 --    NewGameDialog:set("show", false);
 --    gui:setFocus(NormalControls);
 
     gui:activate      (false);
     gui:setInteractive(false);
-    gui:showMouse     (false);
+--    gui:showMouse     (false);
 	Info:set("text", "ingame");
 --	self:Quit();
 	--self.ClientState="ingame";
