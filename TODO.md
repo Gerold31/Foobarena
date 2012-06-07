@@ -1,8 +1,8 @@
 GUI
 * Menu
-+ **BugFixes** 
-+ Settings
-+ Credits
+    + **BugFixes** 
+    + Settings
+    + Credits
 * *HUD*
 
 Robots
@@ -18,10 +18,10 @@ Weapon
 	
 Effects
 * Particles
-+Muzzle flash
-+hit sparks
-+smoke
-+explosions
+    + Muzzle flash
+    + hit sparks
+    + smoke
+    + explosions
 * *Sound*
 
 Gameplay
