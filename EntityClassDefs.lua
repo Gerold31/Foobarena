@@ -302,3 +302,130 @@ EntityClassDefs["info_player_start"]=newEntClassDef(Common, Angles,
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };      -- Rename in editor_bbox? Rename color in editor_bbox_color?
     color      ={ 0, 255, 0 };
 })
+
+
+
+EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotT";
+    description="Robot";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    TorsoID=
+    {
+        type       ="integer";
+        description="TorsoID";
+		value      =0;
+    };
+
+    HeadCount=
+    {
+        type       ="integer";
+        description="HeadCount";
+		value      =1;
+    };
+	
+    HeadID=
+    {
+        type       ="integer";
+        description="HeadID";
+		value      =0;
+    };
+	
+    WeaponCount=
+    {
+        type       ="integer";
+        description="WeaponCount";
+		value      =1;
+    };
+	
+    WeaponID=
+    {
+        type       ="integer";
+        description="WeaponID";
+		value      =0;
+    };
+	
+	MovementType=
+    {
+        type       ="integer";
+        description="MovementType";
+		value      =0;
+    };
+	
+    MovementCount=
+    {
+        type       ="integer";
+        description="MovementCount";
+		value      =1;
+    };
+	
+    MovementID=
+    {
+        type       ="integer";
+        description="MovementID";
+		value      =0;
+    };
+	
+})
+
+EntityClassDefs["RobotTorso"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotTorsoT";
+    description="RobotTorso";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    PartID=
+    {
+        type       ="integer";
+        description="PartID";
+		value      =0;
+    };
+})
+
+EntityClassDefs["RobotHead"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotHeadT";
+    description="RobotHead";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    PartID=
+    {
+        type       ="integer";
+        description="PartID";
+		value      =0;
+    };
+})
+
+EntityClassDefs["RobotMovementWheel"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotMovementWheelT";
+    description="RobotMovementWheel";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    PartID=
+    {
+        type       ="integer";
+        description="PartID";
+		value      =0;
+    };
+})
+
+EntityClassDefs["RobotMovementTrack"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotMovementTrackT";
+    description="RobotMovementTrack";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    PartID=
+    {
+        type       ="integer";
+        description="PartID";
+		value      =0;
+    };
+})
