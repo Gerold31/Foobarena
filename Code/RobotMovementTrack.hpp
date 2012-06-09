@@ -24,22 +24,13 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include "RobotMovement.hpp"
 
-
-class CafuModelT;
 class EntityCreateParamsT;
-
 
 class EntRobotMovementTrackT : public EntRobotMovementT
 {
 public:
 
     EntRobotMovementTrackT(const EntityCreateParamsT& Params);
-
-    void Think(float FrameTime, unsigned long ServerFrameNr);
-    void Draw(bool FirstPersonView, float LodDist) const;
-    void PostDraw(float FrameTime, bool FirstPersonView);
-	void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
-
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);

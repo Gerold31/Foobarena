@@ -79,15 +79,13 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
 
 void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 {
-    static int counter = 0;
-    counter++;
-    if(!mCreated && counter == 10)
+    if(!mCreated)
     {
         mCreated = true;
         string torsoID = "0", headID = "0", weaponID = "0", movementID = "0";
-        int headCount = 1;
-        int weaponCount = 1;
-        int movementType = 0, movementCount = 1;
+        int headCount = 0;
+        int weaponCount = 0;
+        int movementType = 0, movementCount = 0;
 
         for (std::map<std::string, std::string>::const_iterator It=Properties.begin(); It!=Properties.end(); ++It)
         {
@@ -132,7 +130,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         }
         */
 
-        /*
+
         propsMovement["PartID"]=movementID;
         for(int i=0; i<movementCount; i++)
         {
@@ -148,7 +146,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             id = GameWorld->CreateNewEntity(propsMovement, ServerFrameNr, State.Origin);
             mMovement.push_back((EntRobotMovementT *)GameWorld->GetBaseEntityByID(id));
         }
-        */
         Console->DevPrint("Robot constructor finsihed\n");
     }
 }

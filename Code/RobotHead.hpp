@@ -24,9 +24,6 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include "RobotPart.hpp"
 
-#include <string>
-using namespace std;
-
 class EntityCreateParamsT;
 
 class EntRobotHeadT : public EntRobotPartT

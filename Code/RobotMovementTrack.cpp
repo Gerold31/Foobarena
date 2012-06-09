@@ -27,14 +27,11 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Models/Model_cmdl.hpp"
 #include "ConsoleCommands/Console.hpp"
 
-#include <string>
-using namespace std;
-
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotMovementTrackT::GetType() const
 {
     return &TypeInfo;
- // return &EntRobotTrackT::TypeInfo;
+ // return &EntRobotMovementTrackT::TypeInfo;
 }
 
 void* EntRobotMovementTrackT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
@@ -46,50 +43,7 @@ const cf::TypeSys::TypeInfoT EntRobotMovementTrackT::TypeInfo(GetBaseEntTIM(), "
 
 
 EntRobotMovementTrackT::EntRobotMovementTrackT(const EntityCreateParamsT& Params)
-    : EntRobotMovementT(Params,
-                  EntityStateT(Params.Origin,          // Beachte die Abhängigkeit von den in Think() definierten Konstanten!
-                               VectorT(),
-                               BoundingBox3T<double>(VectorT( 100.0,  100.0,  100.0),
-                                                     VectorT(-100.0, -100.0, -100.0)),
-                               0,                                           // Beachte die Abhängigkeit von den in Think() definierten Konstanten!
-                               0,
-                               0,
-                               0,
-                               0,
-                               0,       // ModelIndex
-                               0,       // ModelSequNr
-                               0.0,     // ModelFrameNr
-                               20,      // Health
-                               0,       // Armor
-                               0,       // HaveItems
-                               0,       // HaveWeapons
-                               0,       // ActiveWeaponSlot
-                               0,       // ActiveWeaponSequNr
-                               0.0))    // ActiveWeaponFrameNr
- //     m_Model(Params.GameWorld->GetModel("Games/Foobarena/Models/LifeForms/Butterfly/Butterfly.cmdl")),
-{
-    string path = "Games/Foobarena/Models/Robot/robot_movement_track_" + Params.Properties.find("PartID")->second + ".cmdl";
-    Console->DevPrint(string("loading model: ") + path + "\n");
-    mModel = GameWorld->GetModel(path);
-    Console->DevPrint("loading finsihed\n");
-}
-
-
-void EntRobotMovementTrackT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
+    : EntRobotMovementT(Params, string("Games/Foobarena/Models/Robot/robot_movement_track_") + Params.Properties.find("PartID")->second + ".cmdl")
 {
 }
 
-
-void EntRobotMovementTrackT::Draw(bool /*FirstPersonView*/, float LodDist) const
-{
-}
-
-
-void EntRobotMovementTrackT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
-{
-}
-
-
-void EntRobotMovementTrackT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
-{
-}

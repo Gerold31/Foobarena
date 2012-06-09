@@ -22,32 +22,22 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _ROBOTWEAPON_HPP_
 #define _ROBOTWEAPon_HPP_
 
-#include "../../BaseEntity.hpp"
+#include "RobotPart.hpp"
 
-
-class CafuModelT;
 class EntityCreateParamsT;
 
-
-class EntRobotWeaponT : public BaseEntityT
+class EntRobotWeaponT : public EntRobotPartT
 {
 public:
 
-    EntRobotWeaponT(const EntityCreateParamsT& Params, const EntityStateT& State_);
-
-    void Think(float FrameTime, unsigned long ServerFrameNr);
-    void Draw(bool FirstPersonView, float LodDist) const;
-    void PostDraw(float FrameTime, bool FirstPersonView);
-	void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
-
+    EntRobotWeaponT(const EntityCreateParamsT& Params);
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
 
-protected:
-   const CafuModelT* mModel;
+private:
 };
 
 #endif

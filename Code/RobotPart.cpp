@@ -68,24 +68,30 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params, const std::strin
                                0,                           // HaveWeapons
                                0,                           // ActiveWeaponSlot
                                0,                           // ActiveWeaponSequNr
-                               0.0)),                       // ActiveWeaponFrameNr
-      mModel(GameWorld->GetModel(ModelName))
+                               0.0))                        // ActiveWeaponFrameNr
 {
-    Console->DevPrint(mModel->GetFileName()+"\n");
+    mCreated = false;
+    mModelName = ModelName;
 }
 
 EntRobotPartT::~EntRobotPartT()
 {
-    Console->DevPrint("~EntRobotPartT()\n");
 }
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 {
+    if(!mCreated)
+    {
+        Console->DevPrint("EntRobotPartT::Think:" + mModelName + "\n");
+        mModel = GameWorld->GetModel(mModelName);
+        mCreated = true;
+    }
 }
 
 
 void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
 {
+    if(!mCreated) return;
     AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(0, 0.0f));
     Pose->Draw(-1 /*default skin*/, LodDist);
 }
@@ -93,9 +99,11 @@ void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
 
 void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 {
+    if(!mCreated) return;
 }
 
 
 void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
+    if(!mCreated) return;
 }

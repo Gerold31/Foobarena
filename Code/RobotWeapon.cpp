@@ -25,7 +25,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Libs/LookupTables.hpp"
 #include "../../GameWorld.hpp"
 #include "Models/Model_cmdl.hpp"
-
+#include "ConsoleCommands/Console.hpp"
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotWeaponT::GetType() const
@@ -36,40 +36,14 @@ const cf::TypeSys::TypeInfoT* EntRobotWeaponT::GetType() const
 
 void* EntRobotWeaponT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
 {
-    return NULL;
+    return new EntRobotWeaponT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
 const cf::TypeSys::TypeInfoT EntRobotWeaponT::TypeInfo(GetBaseEntTIM(), "EntRobotWeaponT", "BaseEntityT", EntRobotWeaponT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotWeaponT::EntRobotWeaponT(const EntityCreateParamsT &Params, const EntityStateT &State_)
-    : BaseEntityT(Params, State_)
+EntRobotWeaponT::EntRobotWeaponT(const EntityCreateParamsT& Params)
+    : EntRobotPartT(Params, string("Games/Foobarena/Models/Robot/robot_weapon_") + Params.Properties.find("PartID")->second + ".cmdl")
 {
 }
 
-void EntRobotWeaponT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
-{
-}
-
-
-void EntRobotWeaponT::Draw(bool /*FirstPersonView*/, float LodDist) const
-{
-    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
-    Pose->Draw(-1 /*default skin*/, LodDist);
-}
-
-
-void EntRobotWeaponT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
-{
-    IntrusivePtrT<AnimExprStandardT> StdAE=mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr);
-
-    StdAE->SetForceLoop(true);
-    StdAE->AdvanceTime(FrameTime);
-
-    State.ModelFrameNr=StdAE->GetFrameNr();
-}
-
-
-void EntRobotWeaponT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
-{
-}

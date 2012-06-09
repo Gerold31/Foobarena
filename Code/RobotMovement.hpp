@@ -22,33 +22,22 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _ROBOTMOVEMENT_HPP_
 #define _ROBOTMOVEMENT_HPP_
 
-#include "../../BaseEntity.hpp"
+#include "RobotPart.hpp"
 
-
-class CafuModelT;
 class EntityCreateParamsT;
 
-
-class EntRobotMovementT : public BaseEntityT
+class EntRobotMovementT : public EntRobotPartT
 {
 public:
 
-    EntRobotMovementT(const EntityCreateParamsT& Params, const EntityStateT& State_);
-
-    void Think(float FrameTime, unsigned long ServerFrameNr);
-    void Draw(bool FirstPersonView, float LodDist) const;
-    void PostDraw(float FrameTime, bool FirstPersonView);
-    void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
-
+    EntRobotMovementT(const EntityCreateParamsT& Params, const std::string& ModelName);
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
 
-protected:
-
-    const CafuModelT* mModel;
+private:
 };
 
 #endif

@@ -27,9 +27,6 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Models/Model_cmdl.hpp"
 #include "ConsoleCommands/Console.hpp"
 
-#include <string>
-using namespace std;
-
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotTorsoT::GetType() const
 {
@@ -46,58 +43,7 @@ const cf::TypeSys::TypeInfoT EntRobotTorsoT::TypeInfo(GetBaseEntTIM(), "EntRobot
 
 
 EntRobotTorsoT::EntRobotTorsoT(const EntityCreateParamsT& Params)
-    : BaseEntityT(Params,
-                  EntityStateT(Params.Origin,          // Beachte die Abhängigkeit von den in Think() definierten Konstanten!
-                               VectorT(),
-                               BoundingBox3T<double>(VectorT( 100.0,  100.0,  100.0),
-                                                     VectorT(-100.0, -100.0, -100.0)),
-                               0,                                           // Beachte die Abhängigkeit von den in Think() definierten Konstanten!
-                               0,
-                               0,
-                               0,
-                               0,
-                               0,       // ModelIndex
-                               0,       // ModelSequNr
-                               0.0,     // ModelFrameNr
-                               20,      // Health
-                               0,       // Armor
-                               0,       // HaveItems
-                               0,       // HaveWeapons
-                               0,       // ActiveWeaponSlot
-                               0,       // ActiveWeaponSequNr
-                               0.0))    // ActiveWeaponFrameNr
- //     m_Model(Params.GameWorld->GetModel("Games/Foobarena/Models/LifeForms/Butterfly/Butterfly.cmdl")),
-{
-    string path = "Games/Foobarena/Models/Robot/robot_torso_" + Params.Properties.find("PartID")->second + ".cmdl";
-    Console->DevPrint(string("loading model: ") + path + "\n");
-    mModel = GameWorld->GetModel(path);
-    Console->DevPrint("loading finsihed\n");
-}
-
-
-void EntRobotTorsoT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
+    : EntRobotPartT(Params, string("Games/Foobarena/Models/Robot/robot_torso_") + Params.Properties.find("PartID")->second + ".cmdl")
 {
 }
 
-
-void EntRobotTorsoT::Draw(bool /*FirstPersonView*/, float LodDist) const
-{
-    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
-    Pose->Draw(-1 /*default skin*/, LodDist);
-}
-
-
-void EntRobotTorsoT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
-{
-    IntrusivePtrT<AnimExprStandardT> StdAE=mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr);
-
-    StdAE->SetForceLoop(true);
-    StdAE->AdvanceTime(FrameTime);
-
-    State.ModelFrameNr=StdAE->GetFrameNr();
-}
-
-
-void EntRobotTorsoT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
-{
-}

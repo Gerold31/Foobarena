@@ -33,6 +33,9 @@ class EntRobotPartWeaponT;
 class EntRobotPartMovementT;
 
 
+#include <string>
+using namespace std;
+
 
 class EntRobotPartT : public BaseEntityT
 {
@@ -52,8 +55,9 @@ public:
 
 
 protected:
-	
     const CafuModelT* mModel;
+    bool mCreated;
+    string mModelName;
 };
 
 #endif

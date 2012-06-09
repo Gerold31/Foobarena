@@ -27,7 +27,6 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Models/Model_cmdl.hpp"
 #include "ConsoleCommands/Console.hpp"
 
-
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotMovementT::GetType() const
 {
@@ -45,35 +44,8 @@ void* EntRobotMovementT::CreateInstance(const cf::TypeSys::CreateParamsT& Params
 const cf::TypeSys::TypeInfoT EntRobotMovementT::TypeInfo(GetBaseEntTIM(), "EntRobotMovementT", "BaseEntityT", EntRobotMovementT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotMovementT::EntRobotMovementT(const EntityCreateParamsT& Params, const EntityStateT &State_)
-    : BaseEntityT(Params, State_)
+EntRobotMovementT::EntRobotMovementT(const EntityCreateParamsT& Params, const string &ModelName)
+    : EntRobotPartT(Params, ModelName)
 {
 }
 
-
-void EntRobotMovementT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
-{
-}
-
-
-void EntRobotMovementT::Draw(bool /*FirstPersonView*/, float LodDist) const
-{
-    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
-    Pose->Draw(-1 /*default skin*/, LodDist);
-}
-
-
-void EntRobotMovementT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
-{
-    IntrusivePtrT<AnimExprStandardT> StdAE=mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr);
-
-    StdAE->SetForceLoop(true);
-    StdAE->AdvanceTime(FrameTime);
-
-    State.ModelFrameNr=StdAE->GetFrameNr();
-}
-
-
-void EntRobotMovementT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
-{
-}
