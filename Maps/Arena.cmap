@@ -285,7 +285,7 @@ TerrainDef
 {
   classname "info_player_start"
   angles "-0 90 -0"
-  origin "1147.2528 -826.0869 40"
+  origin "1176 -920 48"
 }
 
 {
@@ -295,7 +295,5 @@ TerrainDef
   HeadCount "1"
   name "Robot_001"
   HeadID "2"
-  MovementCount "1"
-  WeaponCount "1"
-  origin "1384 -912 128"
+  origin "1400 -912 72"
 }
