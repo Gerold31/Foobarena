@@ -230,8 +230,8 @@ bool EntHumanPlayerT::CheckGUI(EntStaticDetailModelT* GuiEnt, Vector3fT& MousePo
 
 
     // TODO: Trace gegen walls!
-    // TODO: Benutzt schon jemand anderes dieses GUI?  Sehr wichtig, um zu vermeiden, daß andauernd auf dem Server der Mauscursor umherspringt
-    //       (und damit z.B. in jedem Frame Interpolation-Einträge anlegt, die beliebig anwachsen würden).
+    // TODO: Benutzt schon jemand anderes dieses GUI?  Sehr wichtig, um zu vermeiden, dass andauernd auf dem Server der Mauscursor umherspringt
+    //       (und damit z.B. in jedem Frame Interpolation-Eintraege anlegt, die beliebig anwachsen wuerden).
 
 
     MousePos.x=px*640.0f;
@@ -772,11 +772,11 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                     GameWorld->GetClipWorld().TraceBoundingBox(ClearingBB, OurNewOrigin+VectorT(0.0, 0.0, AddHeight), VectorT(0.0, 0.0, -999999.0), MaterialT::Clip_Players, &ClipModel, Result);
                     const double SubHeight=999999.0*Result.Fraction;
 
-                    // Beachte: Hier für Epsilon 1.0 (statt z.B. 1.23456789) zu wählen hebt u.U. GENAU den (0 0 -1) Test in
-                    // Physics::CategorizePosition() auf! Nicht schlimm, wenn aber auf Client-Seite übers Netz kleine Rundungsfehler
-                    // vorhanden sind (es werden floats übertragen, nicht doubles!), kommt CategorizePosition() u.U. auf Client- und
-                    // Server-Seite zu verschiedenen Ergebnissen! Der Effekt spielt sich zwar in einem Intervall der Größe 1.0 ab,
-                    // kann mit OpenGL aber zu deutlichem Pixel-Flimmern führen!
+                    // Beachte: Hier fuer Epsilon 1.0 (statt z.B. 1.23456789) zu waehlen hebt u.U. GENAU den (0 0 -1) Test in
+                    // Physics::CategorizePosition() auf! Nicht schlimm, wenn aber auf Client-Seite uebers Netz kleine Rundungsfehler
+                    // vorhanden sind (es werden floats uebertragen, nicht doubles!), kommt CategorizePosition() u.U. auf Client- und
+                    // Server-Seite zu verschiedenen Ergebnissen! Der Effekt spielt sich zwar in einem Intervall der Groesse 1.0 ab,
+                    // kann mit OpenGL aber zu deutlichem Pixel-Flimmern fuehren!
                     OurNewOrigin.z=OurNewOrigin.z+AddHeight-SubHeight+(ClearingBB.Min.z-State.Dimensions.Min.z/*1628.8*/)+1.23456789/*Epsilon (sonst Ruckeln am Anfang!)*/;
 
                     // Old, deprecated code (can get us stuck in non-level ground).
