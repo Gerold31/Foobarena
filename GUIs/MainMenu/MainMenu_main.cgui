@@ -110,10 +110,7 @@ function StartNewGame(WorldName)
 --    NewGameDialog:set("show", false);
 --    gui:setFocus(NormalControls);
 
-    gui:activate      (false);
-    gui:setInteractive(false);
 --    gui:showMouse     (false);
-	Info:set("text", "ingame");
 --	self:Quit();
 	--self.ClientState="ingame";
 	
