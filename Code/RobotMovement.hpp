@@ -30,7 +30,7 @@ class EntRobotMovementT : public EntRobotPartT
 {
 public:
 
-    EntRobotMovementT(const EntityCreateParamsT& Params, const std::string& ModelName);
+    EntRobotMovementT(const EntityCreateParamsT& Params);
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);

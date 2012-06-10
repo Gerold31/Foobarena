@@ -39,11 +39,11 @@ void* EntRobotWeaponT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
     return new EntRobotWeaponT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
-const cf::TypeSys::TypeInfoT EntRobotWeaponT::TypeInfo(GetBaseEntTIM(), "EntRobotWeaponT", "BaseEntityT", EntRobotWeaponT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntRobotWeaponT::TypeInfo(GetBaseEntTIM(), "EntRobotWeaponT", "EntRobotPartT", EntRobotWeaponT::CreateInstance, NULL /*MethodsList*/);
 
 
 EntRobotWeaponT::EntRobotWeaponT(const EntityCreateParamsT& Params)
-    : EntRobotPartT(Params, string("Games/Foobarena/Models/Robot/robot_weapon_") + Params.Properties.find("PartID")->second + ".cmdl")
+    : EntRobotPartT(Params)
 {
 }
 

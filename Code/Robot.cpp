@@ -79,44 +79,50 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
 
 void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 {
+
+    string torsoID = "0", headID = "0", weaponID = "0", movementID = "0";
+    int headCount = 0;
+    int weaponCount = 0;
+    int movementType = 0, movementCount = 0;
+
+    for (std::map<std::string, std::string>::const_iterator It=Properties.begin(); It!=Properties.end(); ++It)
+    {
+        const std::string& key  =It->first;
+        int value = atoi(It->second.c_str());
+
+    //    Console->DevPrint("key: " + key + " value: " + It->second + "\n");
+
+        if      (key=="TorsoID")        torsoID = It->second;
+        else if (key=="HeadCount")      headCount = value;
+        else if (key=="HeadID")         headID = It->second;
+        else if (key=="WeaponCount")    weaponCount = value;
+        else if (key=="WeaponID")       weaponID = It->second;
+        else if (key=="MovementType")   movementType = value;
+        else if (key=="MovementCount")  movementCount = value;
+        else if (key=="MovementID")     movementID = It->second;
+    }
+
     if(!mCreated)
     {
         mCreated = true;
-        string torsoID = "0", headID = "0", weaponID = "0", movementID = "0";
-        int headCount = 0;
-        int weaponCount = 0;
-        int movementType = 0, movementCount = 0;
 
-        for (std::map<std::string, std::string>::const_iterator It=Properties.begin(); It!=Properties.end(); ++It)
-        {
-            const std::string& key  =It->first;
-            int value = atoi(It->second.c_str());
-
-            Console->DevPrint("key: " + key + " value: " + It->second + "\n");
-
-            if      (key=="TorsoID")        torsoID = It->second;
-            else if (key=="HeadCount")      headCount = value;
-            else if (key=="HeadID")         headID = It->second;
-            else if (key=="WeaponCount")    weaponCount = value;
-            else if (key=="WeaponID")       weaponID = It->second;
-            else if (key=="MovementType")   movementType = value;
-            else if (key=="MovementCount")  movementCount = value;
-            else if (key=="MovementID")     movementID = It->second;
-        }
 
         unsigned long id;
-        std::map<std::string, std::string> propsTroso, propsHead, propsWeapon, propsMovement;
+        std::map<std::string, std::string> propsTorso, propsHead, propsWeapon, propsMovement;
 
-        propsTroso["classname"]="RobotTorso";
-        propsTroso["PartID"]=torsoID;
-        id  = GameWorld->CreateNewEntity(propsTroso, ServerFrameNr, State.Origin);
-        mTorso = (EntRobotTorsoT *)GameWorld->GetBaseEntityByID(id);
+        propsTorso["classname"]="RobotTorso";
+        //propsHead["PartID"]=torsoID;
+        propsTorso["model"]="Models/Robot/robot_torso_" + torsoID + ".cmdl";
+        id  = GameWorld->CreateNewEntity(propsTorso, ServerFrameNr, State.Origin);
+    //    mTorso = (EntRobotTorsoT *)GameWorld->GetBaseEntityByID(id);
 
         propsHead["classname"]="RobotHead";
-        propsHead["PartID"]=headID;
+        //propsHead["PartID"]=headID;
+        propsHead["model"]="Models/Robot/robot_head_" + headID + ".cmdl";
         for(int i=0; i<headCount; i++)
         {
-            id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
+       //     id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
+       //     ((EntRobotPartT *)GameWorld->GetBaseEntityByID(id))->loadModel(string("Games/Foobarena/Models/Robot/robot_head_") + /*char(rand()%1 + 0x32)*/ headID + ".cmdl");
             mHead.push_back((EntRobotHeadT *)GameWorld->GetBaseEntityByID(id));
         }
 
@@ -131,16 +137,18 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         */
 
 
-        propsMovement["PartID"]=movementID;
+        //propsMovement["PartID"]=movementID;
         for(int i=0; i<movementCount; i++)
         {
             switch(movementType)
             {
             case 0:
                 propsMovement["classname"]="RobotMovementWheel";
+                propsMovement["model"]="Models/Robot/robot_movement_wheel" + movementID + ".cmdl";
                 break;
             case 1:
                 propsMovement["classname"]="RobotMovementTrack";
+                propsMovement["model"]="Models/Robot/robot_movement_track" + movementID + ".cmdl";
                 break;
             }
             id = GameWorld->CreateNewEntity(propsMovement, ServerFrameNr, State.Origin);
@@ -148,11 +156,18 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         }
         Console->DevPrint("Robot constructor finsihed\n");
     }
+
 }
 
 
 void EntRobotT::Draw(bool /*FirstPersonView*/, float LodDist) const
 {
+    for (std::map<std::string, std::string>::const_iterator It=Properties.begin(); It!=Properties.end(); ++It)
+    {
+        const std::string& key  =It->first;
+
+     //   Console->DevPrint("key: " + key + " value: " + It->second + "\n");
+    }
 }
 
 

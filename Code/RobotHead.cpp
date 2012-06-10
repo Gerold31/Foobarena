@@ -39,10 +39,10 @@ void* EntRobotHeadT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
     return new EntRobotHeadT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
-const cf::TypeSys::TypeInfoT EntRobotHeadT::TypeInfo(GetBaseEntTIM(), "EntRobotHeadT", "BaseEntityT", EntRobotHeadT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntRobotHeadT::TypeInfo(GetBaseEntTIM(), "EntRobotHeadT", "EntRobotPartT", EntRobotHeadT::CreateInstance, NULL /*MethodsList*/);
 
 
 EntRobotHeadT::EntRobotHeadT(const EntityCreateParamsT& Params)
-    : EntRobotPartT(Params, string("Games/Foobarena/Models/Robot/robot_head_") + Params.Properties.find("PartID")->second + ".cmdl")
+    : EntRobotPartT(Params)
 {
 }

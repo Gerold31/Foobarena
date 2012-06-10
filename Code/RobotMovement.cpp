@@ -41,11 +41,11 @@ void* EntRobotMovementT::CreateInstance(const cf::TypeSys::CreateParamsT& Params
     return NULL;
 }
 
-const cf::TypeSys::TypeInfoT EntRobotMovementT::TypeInfo(GetBaseEntTIM(), "EntRobotMovementT", "BaseEntityT", EntRobotMovementT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntRobotMovementT::TypeInfo(GetBaseEntTIM(), "EntRobotMovementT", "EntRobotPartT", EntRobotMovementT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotMovementT::EntRobotMovementT(const EntityCreateParamsT& Params, const string &ModelName)
-    : EntRobotPartT(Params, ModelName)
+EntRobotMovementT::EntRobotMovementT(const EntityCreateParamsT& Params)
+    : EntRobotPartT(Params)
 {
 }
 

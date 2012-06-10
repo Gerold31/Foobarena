@@ -41,23 +41,28 @@ class EntRobotPartT : public BaseEntityT
 {
 public:
 
-    EntRobotPartT(const EntityCreateParamsT& Params, const std::string& ModelName);
-    ~EntRobotPartT();
+    EntRobotPartT(const EntityCreateParamsT& Params);
+    virtual ~EntRobotPartT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
     void Draw(bool FirstPersonView, float LodDist) const;
     void PostDraw(float FrameTime, bool FirstPersonView);
 	void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
 
+    void Serialize(cf::Network::OutStreamT& Stream) const;
+    void Deserialize(cf::Network::InStreamT& Stream, bool IsIniting=false);
+
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
+    void loadModel(string modelName);
+    string getModelName() {return mModelName;}
 
 protected:
-    const CafuModelT* mModel;
-    bool mCreated;
+    CafuModelT* mModel;
     string mModelName;
+
 };
 
 #endif

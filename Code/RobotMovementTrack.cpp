@@ -39,11 +39,11 @@ void* EntRobotMovementTrackT::CreateInstance(const cf::TypeSys::CreateParamsT& P
     return new EntRobotMovementTrackT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
-const cf::TypeSys::TypeInfoT EntRobotMovementTrackT::TypeInfo(GetBaseEntTIM(), "EntRobotMovementTrackT", "BaseEntityT", EntRobotMovementTrackT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntRobotMovementTrackT::TypeInfo(GetBaseEntTIM(), "EntRobotMovementTrackT", "EntRobotMovementT", EntRobotMovementTrackT::CreateInstance, NULL /*MethodsList*/);
 
 
 EntRobotMovementTrackT::EntRobotMovementTrackT(const EntityCreateParamsT& Params)
-    : EntRobotMovementT(Params, string("Games/Foobarena/Models/Robot/robot_movement_track_") + Params.Properties.find("PartID")->second + ".cmdl")
+    : EntRobotMovementT(Params)
 {
 }
 

@@ -29,6 +29,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "ConsoleCommands/Console.hpp"
 #include "Models/Model_cmdl.hpp"
 #include "TypeSys.hpp"
+#include "Network/State.hpp"
 
 
 // Implement the type info related code.
@@ -48,62 +49,103 @@ void* EntRobotPartT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
 const cf::TypeSys::TypeInfoT EntRobotPartT::TypeInfo(GetBaseEntTIM(), "EntRobotPartT", "BaseEntityT", EntRobotPartT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params, const std::string& ModelName)
-    : BaseEntityT(Params,
-                  EntityStateT(Params.Origin,
-                               VectorT(),
-                               BoundingBox3T<double>(VectorT( 200.0,  200.0,  400.0),
-                                                     VectorT(-200.0, -200.0, -100.0)),
-                               0,                           // Heading
-                               0,                           // Pitch
-                               0,                           // Bank
-                               0,     						// StateOfExistance
-                               0,                           // Flags
-                               0,                           // ModelIndex
-                               0,                           // ModelSequNr
-                               0.0,                         // ModelFrameNr
-                               10,                           // Health
-                               0,                           // Armor
-                               0,                           // HaveRobotParts
-                               0,                           // HaveWeapons
-                               0,                           // ActiveWeaponSlot
-                               0,                           // ActiveWeaponSequNr
-                               0.0))                        // ActiveWeaponFrameNr
+EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
+    : BaseEntityT(Params, EntityStateT(Params.Origin,
+                                       VectorT(),
+                                       BoundingBox3T<double>(VectorT( 100.0,  100.0,  100.0),
+                                                             VectorT(-100.0, -100.0, -100.0)),
+                                       0,       // Heading
+                                       0,       // Pitch
+                                       0,       // Bank
+                                       0,       // StateOfExistance
+                                       0,       // Flags
+                                       0,       // ModelIndex
+                                       0,       // ModelSequNr
+                                       0.0,     // ModelFrameNr
+                                       0,       // Health
+                                       0,       // Armor
+                                       0,       // HaveItems
+                                       0,       // HaveWeapons
+                                       0,       // ActiveWeaponSlot
+                                       0,       // ActiveWeaponSequNr
+                                       0.0))    // ActiveWeaponFrameNr)
 {
-    mCreated = false;
-    mModelName = ModelName;
+
+    Console->DevPrint("EntRobotPartT::EntRobotPartT()\n");
+    if(Params.Properties.count("model"))
+    {
+        mModelName = Params.Properties.find("model")->second;
+        Console->DevPrint("model = " + mModelName + "\n");
+        mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
+    }else
+    {
+        Console->DevPrint("model = \"\"\n");
+        mModelName = "";
+        mModel = NULL;
+    }
 }
 
 EntRobotPartT::~EntRobotPartT()
 {
+    Console->DevPrint("EntRobotPartT::~EntRobotPartT()\n");
 }
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 {
-    if(!mCreated)
+    if(!mModel)
     {
-        Console->DevPrint("EntRobotPartT::Think:" + mModelName + "\n");
-        mModel = GameWorld->GetModel(mModelName);
-        mCreated = true;
+ //       loadModel(Properties.find("model")->second);
     }
+
 }
 
 
 void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
 {
-    if(!mCreated) return;
+    if(!mModel)
+    {
+  //      loadModel(Properties.find("model")->second);
+        return;
+    }
+//    Console->DevPrint(string("EntRobotPartT::Draw:") +mModel->GetFileName()+ (mModel ? "true" : "false") + "\n");
+
     AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(0, 0.0f));
     Pose->Draw(-1 /*default skin*/, LodDist);
+
 }
 
 
 void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 {
-    if(!mCreated) return;
 }
 
 
 void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
-    if(!mCreated) return;
+}
+
+void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const
+{
+//    Console->DevPrint("Serialize\n");
+    BaseEntityT::Serialize(Stream);
+    Stream << mModelName;
+}
+
+void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
+{
+ //   Console->DevPrint("Deserialize");
+    BaseEntityT::Deserialize(Stream, IsIniting);
+    Stream >> mModelName;
+    if(!mModel)
+    {
+        Console->DevPrint("Deserialize: model = " + mModelName + "\n");
+        mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
+    }
+}
+
+void EntRobotPartT::loadModel(string modelName)
+{
+    Console->DevWarning("loadModel: " + modelName);
+    mModelName = modelName;
+    mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + modelName));
 }
