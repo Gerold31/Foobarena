@@ -4,7 +4,7 @@ Version(1)
 
 Joints=
 {
-	{ name="RootNode"; parent=-1; pos={ 0, 0, 0 }; qtr={ 0, 0, 0 }; scale={ 50, 50, 50 }; },
+	{ name="RootNode"; parent=-1; pos={ 0, 0, 0 }; qtr={ 0, 1, 0 }; scale={ 25, 25, 25 }; },
 	{ name="Cube"; parent=0; pos={ 0, 0, -0.5 }; qtr={ 0, 0, 0 }; scale={ 0.05000001, 0.05000001, 0.5 }; },
 }
 

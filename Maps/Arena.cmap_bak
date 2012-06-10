@@ -292,8 +292,9 @@ TerrainDef
   classname "Robot"
   TorsoID "1"
   angles "-0 90 -0"
-  HeadCount "1"
   name "Robot_001"
   HeadID "2"
+  WeaponID "1"
+  MovementID "1"
   origin "1400 -912 72"
 }

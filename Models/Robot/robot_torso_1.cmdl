@@ -4,7 +4,7 @@ Version(1)
 
 Joints=
 {
-	{ name="RootNode"; parent=-1; pos={ 0, 0, 0 }; qtr={ 0, 0, 0 }; scale={ 50, 50, 50 }; },
+	{ name="RootNode"; parent=-1; pos={ 0, 0, 0 }; qtr={ 0, 0, 0 }; scale={ 20, 20, 20 }; },
 	{ name="Cube"; parent=0; pos={ 0, 0, 1 }; qtr={ 0, 0, 0 }; scale={ 1, 1, 1 }; },
 	{ name="Lamp"; parent=0; pos={ 4.076245, 1.005454, 5.903862 }; qtr={ -0.1690758, -0.27217135, -0.75588024 }; scale={ 1, 1, 1 }; },
 	{ name="Camera"; parent=0; pos={ 7.481132, -6.50764, 5.343665 }; qtr={ -0.10426686, -0.7032331, -0.5769698 }; scale={ 1, 1, 1 }; },
