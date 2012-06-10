@@ -26,6 +26,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "../../GameWorld.hpp"
 #include "Models/Model_cmdl.hpp"
 #include "ConsoleCommands/Console.hpp"
+#include "Math3D/Matrix.hpp"
 
 #include "File.hpp"
 
@@ -78,7 +79,7 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
 {
     mCreated = false;
     State.Origin.z = 0;
-    State.Heading = 0;
+    State.Heading = 1<<14;
 }
 
 
@@ -231,7 +232,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     //------------------------------Positioning----------------------------------
     //-------------------------------Torso--------------------------------------
     mTorso->State.Origin = State.Origin + Vector3T<double>(0,0,mMovementRadius);
-    PRINT_VAR( mTorso->State.Origin.z);
     mTorso->State.Heading = State.Heading;
 
     //-------------------------------Head--------------------------------------
@@ -245,30 +245,39 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     //-------------------------------Weapon--------------------------------------
     for(int i=0; i<mWeaponCount; i++, j++)
     {
-        mWeapon.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(State.Heading);
         if(i%2 == 0)
-            mWeapon.at(i)->State.Heading = State.Heading;
-        else
         {
-            mWeapon.at(i)->State.Heading = -State.Heading;
-            mWeapon.at(i)->State.Pitch = 1 << 15;
+            mWeapon.at(i)->State.Heading = State.Heading;
+            mWeapon.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
+        }else
+        {
+            mWeapon.at(i)->State.Heading = State.Heading;
+            mWeapon.at(i)->State.Bank = 1 << 15;
+            mWeapon.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
         }
 
-        PRINT_VAR(mWeapon.at(i)->State.Bank);
     }
 
     //-----------------------------Movement--------------------------------------
     for(int i=0; i<mMovementCount; i++, j++)
     {
-        mMovement.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(State.Heading);
         if(i%2 == 0)
-            mMovement.at(i)->State.Heading = State.Heading;
-        else
         {
-            mMovement.at(i)->State.Heading = -State.Heading;
-            mMovement.at(i)->State.Pitch = 1 << 15;
+            mMovement.at(i)->State.Heading = State.Heading;
+            mMovement.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
+        }else
+        {
+            mMovement.at(i)->State.Heading = State.Heading;
+            mMovement.at(i)->State.Bank = 1 << 15;
+            mMovement.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
         }
+
     }
+
+
+    // debug
+    State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+    State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
 
 }
 

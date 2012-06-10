@@ -100,11 +100,23 @@ void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
 {
     if(!mModel) return;
 
-    const float DegPitch=float(State.Pitch)/8192.0f*45.0f;
-    const float DegBank =float(State.Bank )/8192.0f*45.0f;
+    Vector3fT LgtPos(MatSys::Renderer->GetCurrentLightSourcePosition());
+    Vector3fT EyePos(MatSys::Renderer->GetCurrentEyePosition());
 
-    MatSys::Renderer->RotateY(MatSys::RendererI::MODEL_TO_WORLD, DegPitch);
-    MatSys::Renderer->RotateX(MatSys::RendererI::MODEL_TO_WORLD, DegBank);
+    const float DegBank =float(State.Bank )/8192.0f*45.0f;
+    const float DegPitch=float(State.Pitch)/8192.0f*45.0f;
+
+    LgtPos=LgtPos.GetRotY(-DegBank);
+    EyePos=EyePos.GetRotY(-DegBank);
+    MatSys::Renderer->RotateY(MatSys::RendererI::MODEL_TO_WORLD, DegBank);
+
+    LgtPos=LgtPos.GetRotX(DegPitch);
+    EyePos=EyePos.GetRotX(DegPitch);
+    MatSys::Renderer->RotateX(MatSys::RendererI::MODEL_TO_WORLD, -DegPitch);
+
+    MatSys::Renderer->SetCurrentLightSourcePosition(LgtPos.x, LgtPos.y, LgtPos.z);
+    MatSys::Renderer->SetCurrentEyePosition(EyePos.x, EyePos.y, EyePos.z);
+
 
     AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
     Pose->Draw(-1 /*default skin*/, LodDist);
