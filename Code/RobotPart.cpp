@@ -30,6 +30,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Models/Model_cmdl.hpp"
 #include "TypeSys.hpp"
 #include "Network/State.hpp"
+#include "MaterialSystem/Renderer.hpp"
 
 
 // Implement the type info related code.
@@ -92,26 +93,21 @@ EntRobotPartT::~EntRobotPartT()
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 {
-    if(!mModel)
-    {
- //       loadModel(Properties.find("model")->second);
-    }
-
 }
 
 
 void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
 {
-    if(!mModel)
-    {
-  //      loadModel(Properties.find("model")->second);
-        return;
-    }
-//    Console->DevPrint(string("EntRobotPartT::Draw:") +mModel->GetFileName()+ (mModel ? "true" : "false") + "\n");
+    if(!mModel) return;
 
-    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(0, 0.0f));
+    const float DegPitch=float(State.Pitch)/8192.0f*45.0f;
+    const float DegBank =float(State.Bank )/8192.0f*45.0f;
+
+    MatSys::Renderer->RotateY(MatSys::RendererI::MODEL_TO_WORLD, DegPitch);
+    MatSys::Renderer->RotateX(MatSys::RendererI::MODEL_TO_WORLD, DegBank);
+
+    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
     Pose->Draw(-1 /*default skin*/, LodDist);
-
 }
 
 
@@ -126,14 +122,12 @@ void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& 
 
 void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const
 {
-//    Console->DevPrint("Serialize\n");
     BaseEntityT::Serialize(Stream);
     Stream << mModelName;
 }
 
 void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
 {
- //   Console->DevPrint("Deserialize");
     BaseEntityT::Deserialize(Stream, IsIniting);
     Stream >> mModelName;
     if(!mModel)
@@ -141,11 +135,4 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
         Console->DevPrint("Deserialize: model = " + mModelName + "\n");
         mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
     }
-}
-
-void EntRobotPartT::loadModel(string modelName)
-{
-    Console->DevWarning("loadModel: " + modelName);
-    mModelName = modelName;
-    mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + modelName));
 }

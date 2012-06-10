@@ -23,6 +23,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #define _ROBOT_HPP_
 
 #include "../../BaseEntity.hpp"
+#include "Math3D/Vector3.hpp"
 
 #include <vector>
 using namespace std;
@@ -58,6 +59,11 @@ class EntRobotT : public BaseEntityT
     vector<EntRobotHeadT     *> mHead;
     vector<EntRobotWeaponT   *> mWeapon;
     vector<EntRobotMovementT *> mMovement;
+    vector<Vector3T<double> >   mSlots;
+    int mHeadCount, mWeaponCount, mMovementCount;
+    int mSpeed, mRange, mDamage;
+    double mFirerate;
+    int mMovementRadius;
 
 private:
 

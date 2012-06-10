@@ -56,9 +56,6 @@ public:
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
-    void loadModel(string modelName);
-    string getModelName() {return mModelName;}
-
 protected:
     CafuModelT* mModel;
     string mModelName;

@@ -318,26 +318,12 @@ EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
         description="TorsoID";
 		value      =0;
     };
-
-    HeadCount=
-    {
-        type       ="integer";
-        description="HeadCount";
-		value      =1;
-    };
 	
     HeadID=
     {
         type       ="integer";
         description="HeadID";
 		value      =0;
-    };
-	
-    WeaponCount=
-    {
-        type       ="integer";
-        description="WeaponCount";
-		value      =1;
     };
 	
     WeaponID=
@@ -352,13 +338,6 @@ EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
         type       ="integer";
         description="MovementType";
 		value      =0;
-    };
-	
-    MovementCount=
-    {
-        type       ="integer";
-        description="MovementCount";
-		value      =1;
     };
 	
     MovementID=
@@ -376,13 +355,6 @@ EntityClassDefs["RobotTorso"]=newEntClassDef(Common, Angles,
     CppClass   ="EntRobotTorsoT";
     description="RobotTorso";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-
-    PartID=
-    {
-        type       ="integer";
-        description="PartID";
-		value      =0;
-    };
 })
 
 EntityClassDefs["RobotHead"]=newEntClassDef(Common, Angles,
@@ -391,13 +363,14 @@ EntityClassDefs["RobotHead"]=newEntClassDef(Common, Angles,
     CppClass   ="EntRobotHeadT";
     description="RobotHead";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+})
 
-    PartID=
-    {
-        type       ="integer";
-        description="PartID";
-		value      =0;
-    };
+EntityClassDefs["RobotWeapon"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotWeaponT";
+    description="RobotWeapon";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
 })
 
 EntityClassDefs["RobotMovementWheel"]=newEntClassDef(Common, Angles,
@@ -406,13 +379,6 @@ EntityClassDefs["RobotMovementWheel"]=newEntClassDef(Common, Angles,
     CppClass   ="EntRobotMovementWheelT";
     description="RobotMovementWheel";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-
-    PartID=
-    {
-        type       ="integer";
-        description="PartID";
-		value      =0;
-    };
 })
 
 EntityClassDefs["RobotMovementTrack"]=newEntClassDef(Common, Angles,
@@ -421,11 +387,4 @@ EntityClassDefs["RobotMovementTrack"]=newEntClassDef(Common, Angles,
     CppClass   ="EntRobotMovementTrackT";
     description="RobotMovementTrack";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-
-    PartID=
-    {
-        type       ="integer";
-        description="PartID";
-		value      =0;
-    };
 })
