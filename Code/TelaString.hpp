@@ -20,6 +20,8 @@ along with TelaMitto.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <deque>
 #include <cstring>
+#include <string>
+#include <cstdlib>
 using namespace std;
 
 
