@@ -32,6 +32,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Network/State.hpp"
 #include "MaterialSystem/Renderer.hpp"
 
+#include "Robot.hpp"
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotPartT::GetType() const
@@ -50,7 +51,7 @@ void* EntRobotPartT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
 const cf::TypeSys::TypeInfoT EntRobotPartT::TypeInfo(GetBaseEntTIM(), "EntRobotPartT", "BaseEntityT", EntRobotPartT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
+EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params, bool isTorso)
     : BaseEntityT(Params, EntityStateT(Params.Origin,
                                        VectorT(),
                                        BoundingBox3T<double>(VectorT( 100.0,  100.0,  100.0),
@@ -71,7 +72,6 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
                                        0,       // ActiveWeaponSequNr
                                        0.0))    // ActiveWeaponFrameNr)
 {
-
     Console->DevPrint("EntRobotPartT::EntRobotPartT()\n");
     if(Params.Properties.count("model"))
     {
@@ -84,6 +84,8 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
         mModelName = "";
         mModel = NULL;
     }
+    mIsTorso = isTorso;
+    mParent = NULL;
 }
 
 EntRobotPartT::~EntRobotPartT()
@@ -130,6 +132,8 @@ void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 
 void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
+    if(mParent)
+        mParent->TakeDamage(Entity, Amount, ImpactDir, mIsTorso, this);
 }
 
 void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const

@@ -236,15 +236,19 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
     //-------------------------------Head--------------------------------------
     int j=0;
-    for(int i=0; i<mHeadCount; i++, j++)
+    for(int i=0; i<mHead.size(); i++, j++)
     {
-        mHead.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(State.Heading);
+        if(!mHead.at(i)) continue;
+        /// @todo add rotation
+        mHead.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
         mHead.at(i)->State.Heading = State.Heading;
     }
 
     //-------------------------------Weapon--------------------------------------
-    for(int i=0; i<mWeaponCount; i++, j++)
+    for(int i=0; i<mWeapon.size(); i++, j++)
     {
+        if(!mWeapon.at(i)) continue;
+        /// @todo add rotation
         if(i%2 == 0)
         {
             mWeapon.at(i)->State.Heading = State.Heading;
@@ -259,8 +263,15 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     }
 
     //-----------------------------Movement--------------------------------------
-    for(int i=0; i<mMovementCount; i++, j++)
+    int destroyedMovement = 0;
+    for(int i=0; i<mMovement.size(); i++, j++)
     {
+        if(!mMovement.at(i))
+        {
+            destroyedMovement ++;
+            continue;
+        }
+        /// @todo add rotation
         if(i%2 == 0)
         {
             mMovement.at(i)->State.Heading = State.Heading;
@@ -274,10 +285,15 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
     }
 
-
-    // debug
-    State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-    State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+    if(destroyedMovement/(double)mMovement.size() > 0.5)
+    {
+        // debug
+        State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+        State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+    }else
+    {
+        /// @todo tilt robot
+    }
 
 }
 
@@ -294,4 +310,81 @@ void EntRobotT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
 
 void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
+}
+
+
+void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part)
+{
+    if(isTorso)
+    {
+        // 80% damage to torso, rest to the other parts
+        mTorso->State.Health -= 0.8* Amount;
+        int damage = (0.2 * Amount)/ (mHead.size() + mWeapon.size() + mMovement.size());
+        for(int i=0; i<mHead.size(); i++)
+        {
+            mHead.at(i)->State.Health -= damage;
+            // do not destroy part
+            if(mHead.at(i)->State.Health < 1)
+                mHead.at(i)->State.Health = 1;
+        }
+        for(int i=0; i<mWeapon.size(); i++)
+        {
+            mWeapon.at(i)->State.Health -= damage;
+            // do not destroy part
+            if(mWeapon.at(i)->State.Health < 1)
+                mWeapon.at(i)->State.Health = 1;
+        }
+        for(int i=0; i<mMovement.size(); i++)
+        {
+            mMovement.at(i)->State.Health -= damage;
+            // do not destroy part
+            if(mMovement.at(i)->State.Health < 1)
+                mMovement.at(i)->State.Health = 1;
+        }
+    }else
+    {
+        // 80% damage to part, rest to torso
+        part->State.Health -= 0.8*Amount;
+        mTorso->State.Health -= 0.2*Amount;
+        if(part->State.Health <= 0)
+        {
+            /// @todo add some smoke effects
+            /// @todo create ridgit Body and accelerate in ImpactDir
+            // find part;
+            for(int i=0; i<mHead.size(); i++)
+            {
+                if(mHead.at(i) == part)
+                {
+                    delete mHead.at(i);
+                    mHead[i] = NULL;
+                    break;
+                }
+            }
+            for(int i=0; i<mWeapon.size(); i++)
+            {
+                if(mWeapon.at(i) == part)
+                {
+                    delete mWeapon.at(i);
+                    mWeapon[i] = NULL;
+                    break;
+                }
+            }
+            for(int i=0; i<mMovement.size(); i++)
+            {
+                if(mMovement.at(i) == part)
+                {
+                    delete mMovement.at(i);
+                    mMovement[i] = NULL;
+                    break;
+                }
+            }
+        }
+    }
+
+    if(mTorso->State.Health <= 0)
+    {
+        /// @todo destroy robot
+        /// @todo add some smoke effects
+        return;
+    }
 }

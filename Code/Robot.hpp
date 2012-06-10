@@ -35,8 +35,7 @@ class EntRobotTorsoT;
 class EntRobotHeadT;
 class EntRobotWeaponT;
 class EntRobotMovementT;
-
-
+class EntRobotPartT;
 
 class EntRobotT : public BaseEntityT
 {
@@ -47,7 +46,9 @@ class EntRobotT : public BaseEntityT
     void Think(float FrameTime, unsigned long ServerFrameNr);
     void Draw(bool FirstPersonView, float LodDist) const;
     void PostDraw(float FrameTime, bool FirstPersonView);
-	void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
+    void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
+
+    void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part);
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
@@ -56,6 +57,7 @@ class EntRobotT : public BaseEntityT
 
     private:
     EntRobotTorsoT             *mTorso;
+    /// @todo use only 1 vector
     vector<EntRobotHeadT     *> mHead;
     vector<EntRobotWeaponT   *> mWeapon;
     vector<EntRobotMovementT *> mMovement;

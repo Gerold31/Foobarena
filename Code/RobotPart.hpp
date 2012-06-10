@@ -27,11 +27,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 class CafuModelT;
 class EntityCreateParamsT;
 
-class EntRobotPartTorsoT;
-class EntRobotPartHeadT;
-class EntRobotPartWeaponT;
-class EntRobotPartMovementT;
-
+class EntRobotT;
 
 #include <string>
 using namespace std;
@@ -41,7 +37,7 @@ class EntRobotPartT : public BaseEntityT
 {
 public:
 
-    EntRobotPartT(const EntityCreateParamsT& Params);
+    EntRobotPartT(const EntityCreateParamsT& Params, bool isTorso);
     virtual ~EntRobotPartT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
@@ -56,10 +52,14 @@ public:
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
+    void setParent(EntRobotT *parent) {mParent = parent;}
+
 protected:
     CafuModelT* mModel;
     string mModelName;
+    EntRobotT *mParent;
 
+    bool mIsTorso;
 };
 
 #endif
