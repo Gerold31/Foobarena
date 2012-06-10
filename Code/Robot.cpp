@@ -285,7 +285,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
     }
 
-    if(destroyedMovement/(double)mMovement.size() > 0.5)
+    if(destroyedMovement/(double)mMovement.size() < 0.5)
     {
         // debug
         State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);

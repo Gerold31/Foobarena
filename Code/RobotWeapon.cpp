@@ -43,7 +43,7 @@ const cf::TypeSys::TypeInfoT EntRobotWeaponT::TypeInfo(GetBaseEntTIM(), "EntRobo
 
 
 EntRobotWeaponT::EntRobotWeaponT(const EntityCreateParamsT& Params)
-    : EntRobotPartT(Params)
+    : EntRobotPartT(Params, false)
 {
 }
 

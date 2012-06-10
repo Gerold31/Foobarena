@@ -43,6 +43,6 @@ const cf::TypeSys::TypeInfoT EntRobotHeadT::TypeInfo(GetBaseEntTIM(), "EntRobotH
 
 
 EntRobotHeadT::EntRobotHeadT(const EntityCreateParamsT& Params)
-    : EntRobotPartT(Params)
+    : EntRobotPartT(Params, false)
 {
 }

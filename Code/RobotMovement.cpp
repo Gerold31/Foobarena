@@ -45,7 +45,7 @@ const cf::TypeSys::TypeInfoT EntRobotMovementT::TypeInfo(GetBaseEntTIM(), "EntRo
 
 
 EntRobotMovementT::EntRobotMovementT(const EntityCreateParamsT& Params)
-    : EntRobotPartT(Params)
+    : EntRobotPartT(Params, false)
 {
 }
 
