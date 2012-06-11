@@ -87,6 +87,8 @@ EntRobotT::~EntRobotT()
         if(mPart.at(i))
             GameWorld->RemoveEntity(mPart.at(i)->ID);
     }
+    if(mSmoke)
+        GameWorld->RemoveEntity(mSmoke->ID);
 }
 
 void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
@@ -168,14 +170,14 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         }
 
         propsTorso["classname"]="RobotPart";
-        propsTorso["model"]="Models/Robot/robot_torso_" + torsoID + ".cmdl";
-        //propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmdl";
+        propsTorso["model"]         ="Models/Robot/robot_torso_" + torsoID + ".cmdl";
+        propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmap";
 
         id  = GameWorld->CreateNewEntity(propsTorso, ServerFrameNr, State.Origin);
         part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
         part->State.Health = torsoHealth;
         part->setParent(this);
-        part->setType(EntRobotPartT::RobotPartTorso);
+        part->setPartType(EntRobotPartT::RobotPartTorso);
         mPart.push_back(part);
 
         delete file;
@@ -190,15 +192,15 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mRange = file->getInt("range");
 
         propsHead["classname"]="RobotPart";
-        propsHead["model"]="Models/Robot/robot_head_" + headID + ".cmdl";
-        //propsHead["collisionModel"]="Models/Robot/robot_head_" + headID + ".cmdl";
+        propsHead["model"]          ="Models/Robot/robot_head_" + headID + ".cmdl";
+        propsHead["collisionModel"] ="Models/Robot/robot_head_" + headID + ".cmap";
         for(int i=0; i<mHeadCount; i++)
         {
             id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = headHealth;
             part->setParent(this);
-            part->setType(EntRobotPartT::RobotPartHead);
+            part->setPartType(EntRobotPartT::RobotPartHead);
             mPart.push_back(part);
         }
 
@@ -215,15 +217,15 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mFirerate = file->getDouble("firerate");
 
         propsWeapon["classname"]="RobotPart";
-        propsWeapon["model"]="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
-        //propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
+        propsWeapon["model"]         ="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
+        propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmap";
         for(int i=0; i<mWeaponCount; i++)
         {
             id = GameWorld->CreateNewEntity(propsWeapon, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = weaponHealth;
             part->setParent(this);
-            part->setType(EntRobotPartT::RobotPartWeapon);
+            part->setPartType(EntRobotPartT::RobotPartWeapon);
             mPart.push_back(part);
         }
 
@@ -237,14 +239,14 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         case 0:
             file = new File("Games/Foobarena/Models/Robot/robot_movement_wheel_" + movementID + ".cfg");
             propsMovement["classname"]="RobotPart";
-            propsMovement["model"]="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
-            //propsMovement["collisionModel"]="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
+            propsMovement["model"]          ="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
+            propsMovement["collisionModel"] ="Models/Robot/robot_movement_wheel_" + movementID + ".cmap";
             break;
         case 1:
             file = new File("Games/Foobarena/Models/Robot/robot_movement_track_" + movementID + ".cfg");
             propsMovement["classname"]="RobotPart";
-            propsMovement["model"]="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
-            //propsMovement["collisionModel"]="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
+            propsMovement["model"]          ="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
+            propsMovement["collisionModel"] ="Models/Robot/robot_movement_track_" + movementID + ".cmap";
             break;
         }
 
@@ -260,16 +262,18 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = movementHealth;
             part->setParent(this);
-            part->setType(EntRobotPartT::RobotPartMovement);
+            part->setPartType(EntRobotPartT::RobotPartMovement);
             mPart.push_back(part);
         }
 
         delete file;
     }
 
+    if(!mPart.size()) return;
     if(!mPart.at(0)) return;
 
     //------------------------------Positioning----------------------------------
+    int movementCount = 0, headCount = 0, weaponCount = 0;
     for(int i=0; i<mPart.size(); i++)
     {
         if(!mPart.at(i)) continue;
@@ -277,16 +281,33 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mPart.at(i)->State.Pitch   = mSlotRot.at(i).x*8192.0f/45.0f;
         mPart.at(i)->State.Bank    = mSlotRot.at(i).y*8192.0f/45.0f;
         mPart.at(i)->State.Heading = mSlotRot.at(i).z*8192.0f/45.0f + State.Heading;
+
+        if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartHead)
+            headCount++;
+        else if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
+            weaponCount++;
+        else if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartMovement)
+            movementCount++;
     }
 
     if(mPart.at(0)->State.Health > 0)
     {
-        /// @todo check if has enough movements, to move
-        State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-        State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+        if(movementCount / mMovementCount > 0.5)
+        {
+  //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+            State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+        }else
+        {
+            /// @todo tilt robot or break all other movements and move robot to ground
+        }
+
+        if(headCount > 0)
+        {
+            // look for player
+        }
 
         // debug
-        mPart.at(0)->State.Health--;
+        //mPart.at(0)->State.Health--;
     }else
     {
         if(!mSmoke)

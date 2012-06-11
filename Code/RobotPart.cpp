@@ -31,6 +31,8 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "TypeSys.hpp"
 #include "Network/State.hpp"
 #include "MaterialSystem/Renderer.hpp"
+#include "ClipSys/ClipModel.hpp"
+#include "ClipSys/CollisionModelMan.hpp"
 
 #include "Robot.hpp"
 
@@ -82,6 +84,18 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
         mModelName = "";
         mModel = NULL;
     }
+    if(Params.Properties.count("collisionModel"))
+    {
+        mCollisionModelName = Params.Properties.find("collisionModel")->second;
+        CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+mCollisionModelName);
+        ClipModel.SetCollisionModel(CollisionModel);
+        ClipModel.SetUserData(this);
+        ClipModel.Register();
+    }else
+    {
+        mCollisionModelName = "";
+        //CollisionModel = NULL;
+    }
     mParent = NULL;
     mType = 0;
 }
@@ -94,6 +108,12 @@ EntRobotPartT::~EntRobotPartT()
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 {
+    ClipModel.SetOrigin(State.Origin);
+    // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!
+    ClipModel.SetOrientation(cf::math::Matrix3x3T<double>::GetRotateZMatrix(90.0-double(State.Heading)/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
+    ClipModel.Register();
 }
 
 
@@ -139,15 +159,29 @@ void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const
 {
     BaseEntityT::Serialize(Stream);
     Stream << mModelName;
+    Stream << mCollisionModelName;
 }
 
 void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
 {
     BaseEntityT::Deserialize(Stream, IsIniting);
     Stream >> mModelName;
+    Stream >> mCollisionModelName;
     if(!mModel)
     {
         Console->DevPrint("Deserialize: model = " + mModelName + "\n");
         mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
     }
+    if(!CollisionModel)
+    {
+        CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+mCollisionModelName);
+        ClipModel.SetCollisionModel(CollisionModel);
+        ClipModel.SetUserData(this);
+    }
+    ClipModel.SetOrigin(State.Origin);
+    // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!
+    ClipModel.SetOrientation(cf::math::Matrix3x3T<double>::GetRotateZMatrix(90.0-double(State.Heading)/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
+    ClipModel.Register();
 }

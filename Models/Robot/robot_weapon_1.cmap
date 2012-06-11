@@ -1,0 +1,17 @@
+// Cafu Map File
+// Written by CaWE, the Cafu World Editor.
+Version 13
+
+
+{
+  classname "worldspawn"
+
+  {
+    ( 0 -40 -8 ) ( 0 8 -8 ) ( 0 -40 8 ) "Terrains/flat_dk_bump.png" ( 2 0.333333 0 0 ( 0 48 0 ) ( 0 0 -128 ) )
+    ( 0 -40 -8 ) ( 0 -40 8 ) ( 16 -40 -8 ) "Terrains/flat_dk_bump.png" ( 2 0 0 0 ( 128 0 0 ) ( 0 0 -128 ) )
+    ( 0 -40 -8 ) ( 16 -40 -8 ) ( 0 8 -8 ) "Terrains/flat_dk_bump.png" ( 2 0 -0.333333 0 ( 128 0 0 ) ( 0 -48 0 ) )
+    ( 0 -40 8 ) ( 0 8 8 ) ( 16 -40 8 ) "Terrains/flat_dk_bump.png" ( 2 0 -0.333333 0 ( 128 0 0 ) ( 0 -48 0 ) )
+    ( 0 8 -8 ) ( 16 8 -8 ) ( 0 8 8 ) "Terrains/flat_dk_bump.png" ( 2 0 0 0 ( 128 0 0 ) ( 0 0 -128 ) )
+    ( 16 -40 -8 ) ( 16 -40 8 ) ( 16 8 -8 ) "Terrains/flat_dk_bump.png" ( 2 0.333333 0 0 ( 0 48 0 ) ( 0 0 -128 ) )
+  }
+}

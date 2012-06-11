@@ -355,6 +355,18 @@ EntityClassDefs["RobotPart"]=newEntClassDef(Common, Angles,
     CppClass   ="EntRobotPartT";
     description="RobotPart";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+	
+    model=
+    {
+        type       ="file_model";
+        description="Model file name";
+    };
+
+    collisionModel=
+    {
+        type       ="file";
+        description="Collision Model file name";
+    };
 })
 
 
@@ -395,7 +407,7 @@ EntityClassDefs["Smoke"]=newEntClassDef(Common, Angles,
 	
 	Color=
 	{
-		type		="color";
+		type		="string";
 		description	="Color";
 		value 		="255 255 255 127";
 	};
@@ -409,7 +421,7 @@ EntityClassDefs["Smoke"]=newEntClassDef(Common, Angles,
 	
 	ParticleVelocity=
 	{
-		type		="vector";
+		type		="string";
 		description	="ParticleVelocity";
 		value 		="0 0 0";
 	};	

@@ -60,11 +60,12 @@ public:
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
     void setParent(EntRobotT *parent) {mParent = parent;}
-    void setType(int type) {mType = type;}
+    void setPartType(int type) {mType = type;}
+    int getPartType() {return mType;}
 
 protected:
     CafuModelT* mModel;
-    string mModelName;
+    string mModelName, mCollisionModelName;
     EntRobotT *mParent;
     int mType;
 };
