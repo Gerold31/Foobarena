@@ -333,13 +333,6 @@ EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
 		value      =0;
     };
 	
-	MovementType=
-    {
-        type       ="integer";
-        description="MovementType";
-		value      =0;
-    };
-	
     MovementID=
     {
         type       ="integer";

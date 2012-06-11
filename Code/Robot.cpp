@@ -157,7 +157,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                          file->getDouble(TelaString("slotweaponroty") + i),
                                          file->getDouble(TelaString("slotweaponrotr") + i)));
         }
-        mMovementCount = file->getInt("slotmovemntcount");
+        mMovementCount = file->getInt("slotmovementcount");
         for(int i=0; i<mMovementCount; i++)
         {
             mSlotPos.push_back(Vector3dT(file->getDouble(TelaString("slotmovementposx") + i),
@@ -169,7 +169,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                          file->getDouble(TelaString("slotmovementrotr") + i)));
         }
 
-        propsTorso["classname"]="RobotPart";
+        propsTorso["classname"]     ="RobotPart";
         propsTorso["model"]         ="Models/Robot/robot_torso_" + torsoID + ".cmdl";
         propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmap";
 
@@ -191,7 +191,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         headHealth = file->getInt("health");
         mRange = file->getInt("range");
 
-        propsHead["classname"]="RobotPart";
+        propsHead["classname"]      ="RobotPart";
         propsHead["model"]          ="Models/Robot/robot_head_" + headID + ".cmdl";
         propsHead["collisionModel"] ="Models/Robot/robot_head_" + headID + ".cmap";
         for(int i=0; i<mHeadCount; i++)
@@ -216,7 +216,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mDamage = file->getInt("damage");
         mFirerate = file->getDouble("firerate");
 
-        propsWeapon["classname"]="RobotPart";
+        propsWeapon["classname"]     ="RobotPart";
         propsWeapon["model"]         ="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
         propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmap";
         for(int i=0; i<mWeaponCount; i++)
@@ -234,21 +234,10 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
         // --------------------------------Movement---------------------------------
 
-        switch(movementType)
-        {
-        case 0:
-            file = new File("Games/Foobarena/Models/Robot/robot_movement_wheel_" + movementID + ".cfg");
-            propsMovement["classname"]="RobotPart";
-            propsMovement["model"]          ="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
-            propsMovement["collisionModel"] ="Models/Robot/robot_movement_wheel_" + movementID + ".cmap";
-            break;
-        case 1:
-            file = new File("Games/Foobarena/Models/Robot/robot_movement_track_" + movementID + ".cfg");
-            propsMovement["classname"]="RobotPart";
-            propsMovement["model"]          ="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
-            propsMovement["collisionModel"] ="Models/Robot/robot_movement_track_" + movementID + ".cmap";
-            break;
-        }
+        file = new File("Games/Foobarena/Models/Robot/robot_movement_" + movementID + ".cfg");
+        propsMovement["classname"]      ="RobotPart";
+        propsMovement["model"]          ="Models/Robot/robot_movement_" + movementID + ".cmdl";
+        propsMovement["collisionModel"] ="Models/Robot/robot_movement_" + movementID + ".cmap";
 
         file->open();
         movementHealth = file->getInt("health");
@@ -295,7 +284,8 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         if(movementCount / mMovementCount > 0.5)
         {
   //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-            State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+  //          State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+            State.Heading = 3 << 13;
         }else
         {
             /// @todo tilt robot or break all other movements and move robot to ground
