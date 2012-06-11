@@ -36,9 +36,16 @@ using namespace std;
 class EntRobotPartT : public BaseEntityT
 {
 public:
+    enum RobotPartType
+    {
+        RobotPartTorso,
+        RobotPartHead,
+        RobotPartWeapon,
+        RobotPartMovement
+    };
 
     EntRobotPartT(const EntityCreateParamsT& Params);
-    virtual ~EntRobotPartT();
+    ~EntRobotPartT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
     void Draw(bool FirstPersonView, float LodDist) const;
@@ -53,14 +60,13 @@ public:
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
     void setParent(EntRobotT *parent) {mParent = parent;}
-    void setIsTorso(bool isTorso) {mIsTorso = isTorso;}
+    void setType(int type) {mType = type;}
 
 protected:
     CafuModelT* mModel;
     string mModelName;
     EntRobotT *mParent;
-
-    bool mIsTorso;
+    int mType;
 };
 
 #endif

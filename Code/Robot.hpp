@@ -28,16 +28,16 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include <vector>
 using namespace std;
 
-class CafuModelT;
 class EntityCreateParamsT;
-
 class EntRobotPartT;
+class EntSmokeT;
 
 class EntRobotT : public BaseEntityT
 {
     public:
 
     EntRobotT(const EntityCreateParamsT& Params);
+    ~EntRobotT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
     void Draw(bool FirstPersonView, float LodDist) const;
@@ -51,7 +51,7 @@ class EntRobotT : public BaseEntityT
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
 
-    private:
+private:
     vector<EntRobotPartT *> mPart;
     vector<Vector3dT> mSlotPos;
     vector<Vector3dT> mSlotRot;
@@ -59,10 +59,9 @@ class EntRobotT : public BaseEntityT
     int mSpeed, mRange, mDamage;
     double mFirerate;
     int mMovementRadius;
-
-private:
-
     bool mCreated;
+
+    EntSmokeT *mSmoke;
 };
 
 #endif

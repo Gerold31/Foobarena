@@ -27,10 +27,13 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Models/Model_cmdl.hpp"
 #include "ConsoleCommands/Console.hpp"
 #include "Math3D/Matrix.hpp"
+#include "ParticleEngine/ParticleEngineMS.hpp"
+#include "_ResourceManager.hpp"
 
 #include "File.hpp"
 
 #include "RobotPart.hpp"
+#include "Smoke.hpp"
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
@@ -74,8 +77,17 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
     mCreated = false;
     State.Origin.z = 0;
     State.Heading = 1<<14;
+    mSmoke = NULL;
 }
 
+EntRobotT::~EntRobotT()
+{
+    for(int i=0; i<mPart.size(); i++)
+    {
+        if(mPart.at(i))
+            GameWorld->RemoveEntity(mPart.at(i)->ID);
+    }
+}
 
 void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 {
@@ -162,8 +174,8 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         id  = GameWorld->CreateNewEntity(propsTorso, ServerFrameNr, State.Origin);
         part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
         part->State.Health = torsoHealth;
-        part->setIsTorso(true);
         part->setParent(this);
+        part->setType(EntRobotPartT::RobotPartTorso);
         mPart.push_back(part);
 
         delete file;
@@ -186,6 +198,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = headHealth;
             part->setParent(this);
+            part->setType(EntRobotPartT::RobotPartHead);
             mPart.push_back(part);
         }
 
@@ -210,6 +223,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = weaponHealth;
             part->setParent(this);
+            part->setType(EntRobotPartT::RobotPartWeapon);
             mPart.push_back(part);
         }
 
@@ -246,19 +260,14 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = movementHealth;
             part->setParent(this);
+            part->setType(EntRobotPartT::RobotPartMovement);
             mPart.push_back(part);
         }
 
         delete file;
-
-        for(int i=0; i<mSlotRot.size(); i++)
-        {
-            Console->DevPrint((TelaString("SlotRot")+i + "x:" + mSlotRot.at(i).x + "\n").c_str());
-            Console->DevPrint((TelaString("SlotRot")+i + "y:" + mSlotRot.at(i).y + "\n").c_str());
-            Console->DevPrint((TelaString("SlotRot")+i + "z:" + mSlotRot.at(i).z + "\n").c_str());
-        }
-        PRINT_VAR(mPart.size());
     }
+
+    if(!mPart.at(0)) return;
 
     //------------------------------Positioning----------------------------------
     for(int i=0; i<mPart.size(); i++)
@@ -270,10 +279,42 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mPart.at(i)->State.Heading = mSlotRot.at(i).z*8192.0f/45.0f + State.Heading;
     }
 
-    // debug
-    /// @todo check if has enough movements, to move
-    State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-    State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+    if(mPart.at(0)->State.Health > 0)
+    {
+        /// @todo check if has enough movements, to move
+        State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+        State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+
+        // debug
+        mPart.at(0)->State.Health--;
+    }else
+    {
+        if(!mSmoke)
+        {
+            std::map<std::string, std::string> props;
+            props["classname"] = "Smoke";
+            props["StartSize"] = "1500";
+            props["EndSize"] = "10000";
+            props["LifeTime"] = "0.5";
+            props["ParticleSpawnTime"] = "0.01";
+            props["Color"] = "127 127 127 255";
+            props["NumberOfParticles"] = "700";
+            props["ParticleVelocity"] = "0 0 2000";
+
+            unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, State.Origin);
+            mSmoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
+        }
+        State.Origin.z -= 2000*FrameTime;
+        if(State.Origin.z < -4000)
+        {
+            GameWorld->RemoveEntity(ID);
+        }
+    }
+
+    if(mSmoke)
+    {
+        mSmoke->State.Origin = State.Origin;
+    }
 }
 
 
@@ -294,6 +335,7 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
 
 void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part)
 {
+    Console->DevPrint("EntRobotT::TakeDamage");
     if(isTorso)
     {
         // 80% damage to torso, rest to the other parts
@@ -320,18 +362,11 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
             {
                 if(mPart.at(i) == part)
                 {
-                    delete mPart.at(i);
+                    GameWorld->RemoveEntity(mPart.at(i)->ID);
                     mPart[i] = NULL;
                     break;
                 }
             }
         }
-    }
-
-    if(mPart.at(0)->State.Health <= 0)
-    {
-        /// @todo destroy robot
-        /// @todo add some smoke effects
-        return;
     }
 }

@@ -82,13 +82,14 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
         mModelName = "";
         mModel = NULL;
     }
-    mIsTorso = false;
     mParent = NULL;
+    mType = 0;
 }
 
 EntRobotPartT::~EntRobotPartT()
 {
     Console->DevPrint("EntRobotPartT::~EntRobotPartT()\n");
+    mModel = NULL;
 }
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
@@ -131,7 +132,7 @@ void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
     if(mParent)
-        mParent->TakeDamage(Entity, Amount, ImpactDir, mIsTorso, this);
+        mParent->TakeDamage(Entity, Amount, ImpactDir, mType == RobotPartTorso, this);
 }
 
 void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const

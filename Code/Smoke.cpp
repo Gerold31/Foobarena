@@ -105,6 +105,7 @@ EntSmokeT::EntSmokeT(const EntityCreateParamsT& Params)
         }
     }
     mElapsedTime = mTimeSinceLastParticle = 0;
+    createParticle();
 }
 
 void EntSmokeT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
@@ -151,7 +152,7 @@ bool EntSmokeT::ParticleFunction(ParticleMST *particle, float time)
     else particle->Color[3] = 0;
 
 
-    particle->RenderMat=ResMan.RenderMats[ResMan.PARTICLE_WHITESMOKE_FRAME1+((unsigned long)(particle->Age*20))%3 + 14];
+    particle->RenderMat=ResMan.RenderMats[ResMan.PARTICLE_WHITESMOKE_FRAME1+((unsigned long)(particle->Age*20))%2 + 14];
 
     if (particle->Age>=particle->AuxData[1]) return false;
 
