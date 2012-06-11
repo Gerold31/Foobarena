@@ -22,7 +22,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _SMOKE_HPP_
 #define _SMOKE_HPP_
 
-#include "../../BaseEntity.hpp"
+#include "BaseEntity.hpp"
 #include "Math3D/Vector3.hpp"
 
 class EntityCreateParamsT;
