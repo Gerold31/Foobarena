@@ -356,3 +356,61 @@ EntityClassDefs["RobotPart"]=newEntClassDef(Common, Angles,
     description="RobotPart";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
 })
+
+
+EntityClassDefs["Smoke"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntSmokeT";
+    description="Smoke";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+	
+	StartSize=
+	{
+		type		="integer";
+		description	="StartSize";
+		value 		=1000;
+	};
+	
+	EndSize=
+	{
+		type		="integer";
+		description	="EndSize";
+		value 		=1000;
+	};
+	
+	LifeTime=
+	{
+		type		="float";
+		description	="LifeTime (in sec)";
+		value 		=10.0;
+	};
+	
+	ParticleSpawnTime=
+	{
+		type		="float";
+		description	="ParticleSpawnTime (in sec)";
+		value 		=0.1;
+	};
+	
+	Color=
+	{
+		type		="color";
+		description	="Color";
+		value 		="255 255 255 127";
+	};
+	
+	NumberOfParticles=
+	{
+		type		="integer";
+		description	="NumberOfParticles";
+		value 		=10;
+	};
+	
+	ParticleVelocity=
+	{
+		type		="vector";
+		description	="ParticleVelocity";
+		value 		="0 0 0";
+	};	
+})
