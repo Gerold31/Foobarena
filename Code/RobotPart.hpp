@@ -37,7 +37,7 @@ class EntRobotPartT : public BaseEntityT
 {
 public:
 
-    EntRobotPartT(const EntityCreateParamsT& Params, bool isTorso);
+    EntRobotPartT(const EntityCreateParamsT& Params);
     virtual ~EntRobotPartT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
@@ -53,6 +53,7 @@ public:
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
     void setParent(EntRobotT *parent) {mParent = parent;}
+    void setIsTorso(bool isTorso) {mIsTorso = isTorso;}
 
 protected:
     CafuModelT* mModel;

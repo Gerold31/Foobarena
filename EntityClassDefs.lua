@@ -349,42 +349,10 @@ EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
 	
 })
 
-EntityClassDefs["RobotTorso"]=newEntClassDef(Common, Angles,
+EntityClassDefs["RobotPart"]=newEntClassDef(Common, Angles,
 {
     isPoint    =true;
-    CppClass   ="EntRobotTorsoT";
-    description="RobotTorso";
-    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-})
-
-EntityClassDefs["RobotHead"]=newEntClassDef(Common, Angles,
-{
-    isPoint    =true;
-    CppClass   ="EntRobotHeadT";
-    description="RobotHead";
-    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-})
-
-EntityClassDefs["RobotWeapon"]=newEntClassDef(Common, Angles,
-{
-    isPoint    =true;
-    CppClass   ="EntRobotWeaponT";
-    description="RobotWeapon";
-    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-})
-
-EntityClassDefs["RobotMovementWheel"]=newEntClassDef(Common, Angles,
-{
-    isPoint    =true;
-    CppClass   ="EntRobotMovementWheelT";
-    description="RobotMovementWheel";
-    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
-})
-
-EntityClassDefs["RobotMovementTrack"]=newEntClassDef(Common, Angles,
-{
-    isPoint    =true;
-    CppClass   ="EntRobotMovementTrackT";
-    description="RobotMovementTrack";
+    CppClass   ="EntRobotPartT";
+    description="RobotPart";
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
 })

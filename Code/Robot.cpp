@@ -30,13 +30,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include "File.hpp"
 
-#include "RobotTorso.hpp"
-#include "RobotHead.hpp"
-#include "RobotWeapon.hpp"
-
-#include "RobotMovement.hpp"
-#include "RobotMovementWheel.hpp"
-#include "RobotMovementTrack.hpp"
+#include "RobotPart.hpp"
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
@@ -111,6 +105,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             else if (key=="MovementID")     movementID = It->second;
         }
 
+        EntRobotPartT *part;
 
         // --------------------------------Torso---------------------------------
 
@@ -119,35 +114,57 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         torsoHealth = file->getInt("health");
         speedFactor = file->getDouble("speedfactor");
 
+        // torso is always at 0,0,0
+        mSlotPos.push_back(Vector3dT(0,0,0));
+
+        mSlotRot.push_back(Vector3dT(file->getDouble(TelaString("slottorsorotp")),
+                                     file->getDouble(TelaString("slottorsoroty")),
+                                     file->getDouble(TelaString("slottorsorotr"))));
+
         mHeadCount = file->getInt("slotheadcount");
         for(int i=0; i<mHeadCount; i++)
         {
-            mSlots.push_back(Vector3T<double>(file->getDouble(TelaString("slotheadposx") + i),
-                                              file->getDouble(TelaString("slotheadposy") + i),
-                                              file->getDouble(TelaString("slotheadposz") + i)));
+            mSlotPos.push_back(Vector3dT(file->getDouble(TelaString("slotheadposx") + i),
+                                         file->getDouble(TelaString("slotheadposy") + i),
+                                         file->getDouble(TelaString("slotheadposz") + i)));
+
+            mSlotRot.push_back(Vector3dT(file->getDouble(TelaString("slotheadrotp") + i),
+                                         file->getDouble(TelaString("slotheadroty") + i),
+                                         file->getDouble(TelaString("slotheadrotr") + i)));
         }
         mWeaponCount = file->getInt("slotweaponcount");
         for(int i=0; i<mWeaponCount; i++)
         {
-            mSlots.push_back(Vector3T<double>(file->getDouble(TelaString("slotweaponx") + i),
-                                              file->getDouble(TelaString("slotweapony") + i),
-                                              file->getDouble(TelaString("slotweaponz") + i)));
+            mSlotPos.push_back(Vector3dT(file->getDouble(TelaString("slotweaponposx") + i),
+                                         file->getDouble(TelaString("slotweaponposy") + i),
+                                         file->getDouble(TelaString("slotweaponposz") + i)));
+
+            mSlotRot.push_back(Vector3dT(file->getDouble(TelaString("slotweaponrotp") + i),
+                                         file->getDouble(TelaString("slotweaponroty") + i),
+                                         file->getDouble(TelaString("slotweaponrotr") + i)));
         }
         mMovementCount = file->getInt("slotmovemntcount");
         for(int i=0; i<mMovementCount; i++)
         {
-            mSlots.push_back(Vector3T<double>(file->getDouble(TelaString("slotmovementx") + i),
-                                              file->getDouble(TelaString("slotmovementy") + i),
-                                              file->getDouble(TelaString("slotmovementz") + i)));
+            mSlotPos.push_back(Vector3dT(file->getDouble(TelaString("slotmovementposx") + i),
+                                         file->getDouble(TelaString("slotmovementposy") + i),
+                                         file->getDouble(TelaString("slotmovementposz") + i)));
+
+            mSlotRot.push_back(Vector3dT(file->getDouble(TelaString("slotmovementrotp") + i),
+                                         file->getDouble(TelaString("slotmovementroty") + i),
+                                         file->getDouble(TelaString("slotmovementrotr") + i)));
         }
 
-        propsTorso["classname"]="RobotTorso";
+        propsTorso["classname"]="RobotPart";
         propsTorso["model"]="Models/Robot/robot_torso_" + torsoID + ".cmdl";
         //propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmdl";
 
         id  = GameWorld->CreateNewEntity(propsTorso, ServerFrameNr, State.Origin);
-        mTorso = (EntRobotTorsoT *)GameWorld->GetBaseEntityByID(id);
-        mTorso->State.Health = torsoHealth;
+        part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
+        part->State.Health = torsoHealth;
+        part->setIsTorso(true);
+        part->setParent(this);
+        mPart.push_back(part);
 
         delete file;
 
@@ -160,14 +177,16 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         headHealth = file->getInt("health");
         mRange = file->getInt("range");
 
-        propsHead["classname"]="RobotHead";
+        propsHead["classname"]="RobotPart";
         propsHead["model"]="Models/Robot/robot_head_" + headID + ".cmdl";
         //propsHead["collisionModel"]="Models/Robot/robot_head_" + headID + ".cmdl";
         for(int i=0; i<mHeadCount; i++)
         {
             id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
-            GameWorld->GetBaseEntityByID(id)->State.Health = headHealth;
-            mHead.push_back((EntRobotHeadT *)GameWorld->GetBaseEntityByID(id));
+            part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
+            part->State.Health = headHealth;
+            part->setParent(this);
+            mPart.push_back(part);
         }
 
         delete file;
@@ -182,14 +201,16 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         mDamage = file->getInt("damage");
         mFirerate = file->getDouble("firerate");
 
-        propsWeapon["classname"]="RobotWeapon";
+        propsWeapon["classname"]="RobotPart";
         propsWeapon["model"]="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
         //propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
         for(int i=0; i<mWeaponCount; i++)
         {
             id = GameWorld->CreateNewEntity(propsWeapon, ServerFrameNr, State.Origin);
-            GameWorld->GetBaseEntityByID(id)->State.Health = weaponHealth;
-            mWeapon.push_back((EntRobotWeaponT *)GameWorld->GetBaseEntityByID(id));
+            part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
+            part->State.Health = weaponHealth;
+            part->setParent(this);
+            mPart.push_back(part);
         }
 
         delete file;
@@ -201,13 +222,13 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         {
         case 0:
             file = new File("Games/Foobarena/Models/Robot/robot_movement_wheel_" + movementID + ".cfg");
-            propsMovement["classname"]="RobotMovementWheel";
+            propsMovement["classname"]="RobotPart";
             propsMovement["model"]="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
             //propsMovement["collisionModel"]="Models/Robot/robot_movement_wheel_" + movementID + ".cmdl";
             break;
         case 1:
             file = new File("Games/Foobarena/Models/Robot/robot_movement_track_" + movementID + ".cfg");
-            propsMovement["classname"]="RobotMovementTrack";
+            propsMovement["classname"]="RobotPart";
             propsMovement["model"]="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
             //propsMovement["collisionModel"]="Models/Robot/robot_movement_track_" + movementID + ".cmdl";
             break;
@@ -222,79 +243,37 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         for(int i=0; i<mMovementCount; i++)
         {
             id = GameWorld->CreateNewEntity(propsMovement, ServerFrameNr, State.Origin);
-            GameWorld->GetBaseEntityByID(id)->State.Health = movementHealth;
-            mMovement.push_back((EntRobotMovementT *)GameWorld->GetBaseEntityByID(id));
+            part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
+            part->State.Health = movementHealth;
+            part->setParent(this);
+            mPart.push_back(part);
         }
 
         delete file;
+
+        for(int i=0; i<mSlotRot.size(); i++)
+        {
+            Console->DevPrint((TelaString("SlotRot")+i + "x:" + mSlotRot.at(i).x + "\n").c_str());
+            Console->DevPrint((TelaString("SlotRot")+i + "y:" + mSlotRot.at(i).y + "\n").c_str());
+            Console->DevPrint((TelaString("SlotRot")+i + "z:" + mSlotRot.at(i).z + "\n").c_str());
+        }
+        PRINT_VAR(mPart.size());
     }
 
     //------------------------------Positioning----------------------------------
-    //-------------------------------Torso--------------------------------------
-    mTorso->State.Origin = State.Origin + Vector3T<double>(0,0,mMovementRadius);
-    mTorso->State.Heading = State.Heading;
-
-    //-------------------------------Head--------------------------------------
-    int j=0;
-    for(int i=0; i<mHead.size(); i++, j++)
+    for(int i=0; i<mPart.size(); i++)
     {
-        if(!mHead.at(i)) continue;
-        /// @todo add rotation
-        mHead.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
-        mHead.at(i)->State.Heading = State.Heading;
+        if(!mPart.at(i)) continue;
+        mPart.at(i)->State.Origin  = State.Origin + Vector3dT(0,0,mMovementRadius) + mSlotPos.at(i).GetRotZ(-State.Heading *45.0f/8192.0f);
+        mPart.at(i)->State.Pitch   = mSlotRot.at(i).x*8192.0f/45.0f;
+        mPart.at(i)->State.Bank    = mSlotRot.at(i).y*8192.0f/45.0f;
+        mPart.at(i)->State.Heading = mSlotRot.at(i).z*8192.0f/45.0f + State.Heading;
     }
 
-    //-------------------------------Weapon--------------------------------------
-    for(int i=0; i<mWeapon.size(); i++, j++)
-    {
-        if(!mWeapon.at(i)) continue;
-        /// @todo add rotation
-        if(i%2 == 0)
-        {
-            mWeapon.at(i)->State.Heading = State.Heading;
-            mWeapon.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
-        }else
-        {
-            mWeapon.at(i)->State.Heading = State.Heading;
-            mWeapon.at(i)->State.Bank = 1 << 15;
-            mWeapon.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
-        }
-
-    }
-
-    //-----------------------------Movement--------------------------------------
-    int destroyedMovement = 0;
-    for(int i=0; i<mMovement.size(); i++, j++)
-    {
-        if(!mMovement.at(i))
-        {
-            destroyedMovement ++;
-            continue;
-        }
-        /// @todo add rotation
-        if(i%2 == 0)
-        {
-            mMovement.at(i)->State.Heading = State.Heading;
-            mMovement.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
-        }else
-        {
-            mMovement.at(i)->State.Heading = State.Heading;
-            mMovement.at(i)->State.Bank = 1 << 15;
-            mMovement.at(i)->State.Origin = mTorso->State.Origin + mSlots.at(j).GetRotZ(-State.Heading *45.0f/8192.0f);
-        }
-
-    }
-
-    if(destroyedMovement/(double)mMovement.size() < 0.5)
-    {
-        // debug
-        State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-        State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
-    }else
-    {
-        /// @todo tilt robot
-    }
-
+    // debug
+    /// @todo check if has enough movements, to move
+    State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+    State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
 }
 
 
@@ -318,70 +297,38 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
     if(isTorso)
     {
         // 80% damage to torso, rest to the other parts
-        mTorso->State.Health -= 0.8* Amount;
-        int damage = (0.2 * Amount)/ (mHead.size() + mWeapon.size() + mMovement.size());
-        for(int i=0; i<mHead.size(); i++)
+        part->State.Health -= 0.8* Amount;
+        int damage = 0.2 * Amount/ mPart.size();
+        for(int i=1; i<mPart.size(); i++)
         {
-            mHead.at(i)->State.Health -= damage;
+            mPart.at(i)->State.Health -= damage;
             // do not destroy part
-            if(mHead.at(i)->State.Health < 1)
-                mHead.at(i)->State.Health = 1;
-        }
-        for(int i=0; i<mWeapon.size(); i++)
-        {
-            mWeapon.at(i)->State.Health -= damage;
-            // do not destroy part
-            if(mWeapon.at(i)->State.Health < 1)
-                mWeapon.at(i)->State.Health = 1;
-        }
-        for(int i=0; i<mMovement.size(); i++)
-        {
-            mMovement.at(i)->State.Health -= damage;
-            // do not destroy part
-            if(mMovement.at(i)->State.Health < 1)
-                mMovement.at(i)->State.Health = 1;
+            if(mPart.at(i)->State.Health < 1)
+                mPart.at(i)->State.Health = 1;
         }
     }else
     {
         // 80% damage to part, rest to torso
         part->State.Health -= 0.8*Amount;
-        mTorso->State.Health -= 0.2*Amount;
+        mPart.at(0)->State.Health -= 0.2*Amount;
         if(part->State.Health <= 0)
         {
             /// @todo add some smoke effects
             /// @todo create ridgit Body and accelerate in ImpactDir
             // find part;
-            for(int i=0; i<mHead.size(); i++)
+            for(int i=1; i<mPart.size(); i++)
             {
-                if(mHead.at(i) == part)
+                if(mPart.at(i) == part)
                 {
-                    delete mHead.at(i);
-                    mHead[i] = NULL;
-                    break;
-                }
-            }
-            for(int i=0; i<mWeapon.size(); i++)
-            {
-                if(mWeapon.at(i) == part)
-                {
-                    delete mWeapon.at(i);
-                    mWeapon[i] = NULL;
-                    break;
-                }
-            }
-            for(int i=0; i<mMovement.size(); i++)
-            {
-                if(mMovement.at(i) == part)
-                {
-                    delete mMovement.at(i);
-                    mMovement[i] = NULL;
+                    delete mPart.at(i);
+                    mPart[i] = NULL;
                     break;
                 }
             }
         }
     }
 
-    if(mTorso->State.Health <= 0)
+    if(mPart.at(0)->State.Health <= 0)
     {
         /// @todo destroy robot
         /// @todo add some smoke effects

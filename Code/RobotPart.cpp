@@ -43,15 +43,13 @@ const cf::TypeSys::TypeInfoT* EntRobotPartT::GetType() const
 
 void* EntRobotPartT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
 {
-    Console->Warning("Cannot instantiate abstract class!\n");
-    assert(false);
-    return NULL;
+    return new EntRobotPartT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
 const cf::TypeSys::TypeInfoT EntRobotPartT::TypeInfo(GetBaseEntTIM(), "EntRobotPartT", "BaseEntityT", EntRobotPartT::CreateInstance, NULL /*MethodsList*/);
 
 
-EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params, bool isTorso)
+EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
     : BaseEntityT(Params, EntityStateT(Params.Origin,
                                        VectorT(),
                                        BoundingBox3T<double>(VectorT( 100.0,  100.0,  100.0),
@@ -84,7 +82,7 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params, bool isTorso)
         mModelName = "";
         mModel = NULL;
     }
-    mIsTorso = isTorso;
+    mIsTorso = false;
     mParent = NULL;
 }
 

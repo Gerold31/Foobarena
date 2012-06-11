@@ -31,10 +31,6 @@ using namespace std;
 class CafuModelT;
 class EntityCreateParamsT;
 
-class EntRobotTorsoT;
-class EntRobotHeadT;
-class EntRobotWeaponT;
-class EntRobotMovementT;
 class EntRobotPartT;
 
 class EntRobotT : public BaseEntityT
@@ -56,12 +52,9 @@ class EntRobotT : public BaseEntityT
 
 
     private:
-    EntRobotTorsoT             *mTorso;
-    /// @todo use only 1 vector
-    vector<EntRobotHeadT     *> mHead;
-    vector<EntRobotWeaponT   *> mWeapon;
-    vector<EntRobotMovementT *> mMovement;
-    vector<Vector3T<double> >   mSlots;
+    vector<EntRobotPartT *> mPart;
+    vector<Vector3dT> mSlotPos;
+    vector<Vector3dT> mSlotRot;
     int mHeadCount, mWeaponCount, mMovementCount;
     int mSpeed, mRange, mDamage;
     double mFirerate;
