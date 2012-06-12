@@ -37,7 +37,7 @@ public:
     class RobotInfoT{
     public:
         RobotInfoT(int torsoID = -1, int headID = -1, int weaponID = -1, int movementID = -1);
-        map<string, string> *toProperties();
+        map<string, string> toProperties();
     private:
         int mTorsoID, mHeadID, mWeaponID, mMovementID;
     };
@@ -50,7 +50,7 @@ public:
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
-    void spawnRobot(int torsoID = -1, int headID = -1, int weaponID = -1, int movementID = -1);
+    static int spawnRobot(lua_State *l);
 
 protected:
     vector<RobotInfoT *> mRobotsToSpawn;

@@ -27,11 +27,17 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "TypeSys.hpp"
 #include "SceneGraph/Node.hpp"
 #include "TelaString.hpp"
-
-
+#include "ScriptState.hpp"
 #include "MaterialSystem/Renderer.hpp"
 #include "Math3D/Matrix.hpp"
 #include "SceneGraph/Node.hpp"
+
+extern "C"
+{
+    #include <lua.h>
+    #include <lualib.h>
+    #include <lauxlib.h>
+}
 
 #define MAX_TORSO    3
 #define MAX_HEAD     2
@@ -40,6 +46,12 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + (x) + "\n").toString())
+
+static const luaL_reg MethodsList[]=
+{
+    { "spawnRobot", EntRobotSpawnerT::spawnRobot},
+    { NULL, NULL }
+};
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotSpawnerT::GetType() const
@@ -53,7 +65,7 @@ void* EntRobotSpawnerT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
     return new EntRobotSpawnerT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
-const cf::TypeSys::TypeInfoT EntRobotSpawnerT::TypeInfo(GetBaseEntTIM(), "EntRobotSpawnerT", "BaseEntityT", EntRobotSpawnerT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntRobotSpawnerT::TypeInfo(GetBaseEntTIM(), "EntRobotSpawnerT", "BaseEntityT", EntRobotSpawnerT::CreateInstance, MethodsList);
 
 
 EntRobotSpawnerT::EntRobotSpawnerT(const EntityCreateParamsT& Params)
@@ -90,42 +102,41 @@ void EntRobotSpawnerT::Think(float /*FrameTime*/, unsigned long ServerFrameNr)
                                        (rand()%int(State.Dimensions.Max.y - State.Dimensions.Min.y))  - (State.Dimensions.Max.y - State.Dimensions.Min.y)/2, 0);
         pos.z = 0;
 
-        Console->DevPrint((char *)(TelaString("spawning Robot at ") + pos.x + " " + pos.y + " " + pos.z));
 
-        unsigned int id = GameWorld->CreateNewEntity(*mRobotsToSpawn.at(i)->toProperties(), ServerFrameNr, pos);
+        unsigned int id = GameWorld->CreateNewEntity(mRobotsToSpawn.at(i)->toProperties(), ServerFrameNr, pos);
         GameWorld->GetBaseEntityByID(id)->State.Origin = pos;
         delete mRobotsToSpawn.at(i);
     }
     mRobotsToSpawn.clear();
-
-    if(rand() % 1000 == 0)
-        spawnRobot();
 }
 
 
-void EntRobotSpawnerT::spawnRobot(int torsoID, int headID, int weaponID, int movementID)
+int EntRobotSpawnerT::spawnRobot(lua_State *l)
 {
-    mRobotsToSpawn.push_back(new RobotInfoT(torsoID, headID, weaponID, movementID));
+    EntRobotSpawnerT* Ent=(EntRobotSpawnerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+    Ent->mRobotsToSpawn.push_back(new RobotInfoT(luaL_checknumber(l, 2), luaL_checknumber(l, 3), luaL_checknumber(l, 4), luaL_checknumber(l, 5)));
+    return 0;
 }
 
 
 EntRobotSpawnerT::RobotInfoT::RobotInfoT(int torsoID, int headID, int weaponID, int movementID)
 {
-    PRINT_VAR(mTorsoID    = torsoID    < 0 ? (rand()%MAX_TORSO)    +1 : torsoID);
-    PRINT_VAR(mHeadID     = headID     < 0 ? (rand()%MAX_HEAD)     +1 : headID);
-    PRINT_VAR(mWeaponID   = weaponID   < 0 ? (rand()%MAX_WEAPON)   +1 : weaponID);
-    PRINT_VAR(mMovementID = movementID < 0 ? (rand()%MAX_MOVEMENT) +1 : movementID);
+    mTorsoID    = torsoID    < 0 ? (rand()%MAX_TORSO)    +1 : torsoID;
+    mHeadID     = headID     < 0 ? (rand()%MAX_HEAD)     +1 : headID;
+    mWeaponID   = weaponID   < 0 ? (rand()%MAX_WEAPON)   +1 : weaponID;
+    mMovementID = movementID < 0 ? (rand()%MAX_MOVEMENT) +1 : movementID;
 }
 
-map<string, string> *EntRobotSpawnerT::RobotInfoT::toProperties()
+map<string, string> EntRobotSpawnerT::RobotInfoT::toProperties()
 {
-    map<string, string> *props = new map<string, string>;
-    (*props)["classname"]  = "Robot";
-
-    (*props)["TorsoID"]   = TelaString(mTorsoID);
-    (*props)["HeadID"]    = TelaString(mHeadID);
-    (*props)["WeaponID"]  = TelaString(mWeaponID);
-    (*props)["MovementID"]= TelaString(mMovementID);
+    map<string, string> props;
+    props["classname"] = "Robot";
+//    props["name"]      = "Robot";
+    props["TorsoID"]   = TelaString(mTorsoID);
+    props["HeadID"]    = TelaString(mHeadID);
+    props["WeaponID"]  = TelaString(mWeaponID);
+    props["MovementID"]= TelaString(mMovementID);
     return props;
 }
 
