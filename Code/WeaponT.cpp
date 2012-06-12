@@ -14,7 +14,7 @@
 
 
 #define WEAPON_PATH(s) (std::string("Games/Foobarena/Models/Weapons/") + s + "/" + s + "_v.cmdl")
-#define WEAPON_DEFAULT "Baretta"
+#define WEAPON_DEFAULT "DesertEagle"
 
 WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weaponId) : mWeaponId(weaponId)
 {
@@ -26,6 +26,8 @@ WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weapo
 		weaponName = WEAPON_DEFAULT;
 	}
     mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));
+
+    modelManager->GetModel(std::string("Games/Foobarena/Models/Items/Ammo_") + weaponName + "/Ammo_" + weaponName + ".cmdl");
 	
 	mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(std::string("Weapon/") + weaponName + "_Shot"));
 	

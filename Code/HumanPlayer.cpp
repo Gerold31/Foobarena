@@ -31,6 +31,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "PhysicsWorld.hpp"
 #include "Libs/LookupTables.hpp"
 #include "Libs/Physics.hpp"
+#include "WeaponT.hpp"
 
 #include "SoundSystem/SoundSys.hpp"
 #include "../../GameWorld.hpp"
@@ -104,7 +105,7 @@ EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
                                100,     // Health
                                0,       // Armor
                                0,       // HaveItems
-                               0,       // HaveWeapons
+                               1,       // HaveWeapons
                                0,       // ActiveWeaponSlot
                                0,       // ActiveWeaponSequNr
                                0.0)),   // ActiveWeaponFrameNr
@@ -405,24 +406,24 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                 // Handle the state machine of the "_v" (view) model of the current weapon.
                 if (State.HaveWeapons & (1 << State.ActiveWeaponSlot))
                 {
-                    /*
-                    const CarriedWeaponT* CarriedWeapon=cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot);
+
+                    const WeaponT* weapon = cf::GameSys::GameImplT::GetInstance().getWeapon();
 
                     // Advance the frame time of the weapon.
-                    const CafuModelT* WeaponModel=CarriedWeapon->GetViewWeaponModel();
+                    const CafuModelT* weaponModel = weapon->getWeaponModel();
 
-                    IntrusivePtrT<AnimExprStandardT> StdAE=WeaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr);
+                    IntrusivePtrT<AnimExprStandardT> StdAE = weaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr);
 
                     StdAE->SetForceLoop(true);
                     StdAE->AdvanceTime(PlayerCommands[PCNr].FrameTime);
 
                     const float NewFrameNr=StdAE->GetFrameNr();
-                    const bool  AnimSequenceWrap=NewFrameNr < State.ActiveWeaponFrameNr || NewFrameNr > WeaponModel->GetAnims()[State.ActiveWeaponSequNr].Frames.Size()-1;
+                    const bool  AnimSequenceWrap=NewFrameNr < State.ActiveWeaponFrameNr || NewFrameNr > weaponModel->GetAnims()[State.ActiveWeaponSequNr].Frames.Size()-1;
 
                     State.ActiveWeaponFrameNr=NewFrameNr;
 
-                    CarriedWeapon->ServerSide_Think(this, PlayerCommands[PCNr], ThinkingOnServerSide, ServerFrameNr, AnimSequenceWrap);
-                    */
+                    weapon->ServerSide_Think(this, PlayerCommands[PCNr], ThinkingOnServerSide, ServerFrameNr, AnimSequenceWrap);
+
                 }
 
 

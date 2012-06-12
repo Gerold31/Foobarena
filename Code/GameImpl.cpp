@@ -31,6 +31,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
 #include "_ResourceManager.hpp"
+#include "WeaponT.hpp"
 
 #include "ConsoleCommands/Console.hpp"
 
@@ -69,6 +70,7 @@ cf::GameSys::GameImplT::GameImplT()
       Sv_PhysicsWorld(NULL),
       Cl_PhysicsWorld(NULL),
       ScriptState(NULL),
+      mWeapon(NULL),
       IsThinking(false)
 {
 }
@@ -76,6 +78,7 @@ cf::GameSys::GameImplT::GameImplT()
 
 void cf::GameSys::GameImplT::Initialize(bool AsClient, bool AsServer, ModelManagerT& ModelMan)
 {
+    mWeapon = new WeaponT(&ModelMan, "DesertEagle", 0);
 
     RunningAsClient=AsClient;
     RunningAsServer=AsServer;
@@ -329,4 +332,9 @@ void cf::GameSys::GameImplT::FreeBaseEntity(BaseEntityT* BaseEntity)
     if (ScriptState) ScriptState->RemoveEntityInstance(BaseEntity);
 
     delete BaseEntity;
+}
+
+WeaponT* cf::GameSys::GameImplT::getWeapon()
+{
+    return mWeapon;
 }

@@ -27,6 +27,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 class PhysicsWorldT;
 class SoundI;
+class WeaponT;
 
 
 namespace cf
@@ -55,6 +56,8 @@ namespace cf
             BaseEntityT* CreateBaseEntityFromTypeNr(unsigned long TypeNr, const std::map<std::string, std::string>& Properties, const cf::SceneGraph::GenericNodeT* RootNode, const cf::ClipSys::CollisionModelT* CollisionModel, unsigned long ID, unsigned long WorldFileIndex, unsigned long MapFileIndex, cf::GameSys::GameWorldI* GameWorld);
             void FreeBaseEntity(BaseEntityT* BaseEntity);
 
+            WeaponT* getWeapon();
+
 
 
             bool IsSvThinking() const { return IsThinking; }
@@ -79,6 +82,8 @@ namespace cf
             bool                      IsThinking;       ///< True while the server is thinking, i.e. between the calls to Sv_BeginThinking() and Sv_EndThinking().
 
             ArrayT<SoundI*>           m_PreCacheSounds; ///< Array of all precached sounds.
+
+            WeaponT*                  mWeapon;
         };
     }
 }
