@@ -19,7 +19,7 @@ struct ParticleMST;
 class WeaponT
 {
 public:
-	WeaponT(ModelManagerT *modelManager, std::string weaponModel);
+    WeaponT(ModelManagerT *modelManager, std::string weaponModel, char weaponId);
 	virtual ~WeaponT();
 	
 	const CafuModelT* getWeaponModel() const;
@@ -33,6 +33,7 @@ public:
 private:
 	const CafuModelT *mWeaponModel;
 	SoundI *mShotSound;
+    const char mWeaponId;
 	
 	static bool ParticleFunction_ShotHitWall(ParticleMST *particle, float time);
 	static bool ParticleFunction_HitEntity(ParticleMST *particle, float time);

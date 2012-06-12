@@ -14,16 +14,18 @@
 
 
 #define WEAPON_PATH(s) (std::string("Games/Foobarena/Models/Weapons/") + s + "/" + s + "_v.cmdl")
+#define WEAPON_DEFAULT "Baretta"
 
-WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName)
+WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weaponId) : mWeaponId(weaponId)
 {
+	Console->Print(std::string("[Dev] Created weapon \"") + weaponName + "\"");
 	std::ifstream f(WEAPON_PATH(weaponName).c_str());
 	if(!f.is_open())
 	{
-		Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to Baretta!");
-		weaponName = "Baretta";
+		Console->Warning(std::string("[Warning] Couldn't find Weapon \"") + weaponName + "\" - falling back to WEAPON_DEFAULT");
+		weaponName = WEAPON_DEFAULT;
 	}
-	mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));
+    mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));
 	
 	mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(std::string("Weapon/") + weaponName + "_Shot"));
 	
@@ -41,7 +43,105 @@ const CafuModelT* WeaponT::getWeaponModel() const
 
 void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& PlayerCommand, bool ThinkingOnServerSide, unsigned long ServerFrameNr, bool AnimSequenceWrap) const
 {
+    EntityStateT &state = Player->State;
 
+    switch (state.ActiveWeaponSequNr)
+    {
+        case 3: // Reload
+            if (AnimSequenceWrap)
+            {
+                state.ActiveWeaponSequNr =0;
+                state.ActiveWeaponFrameNr=0.0;
+
+                const char Amount=state.HaveAmmo[mWeaponId]>6 ? 6 : state.HaveAmmo[mWeaponId]; /// @todo use ammo slot instead of weapon slot?
+
+                state.HaveAmmoInWeapons[mWeaponId]+=Amount;
+                state.HaveAmmo         [mWeaponId]-=Amount; /// @todo use ammo slot instead of weapon slot?
+            }
+            break;
+
+        case 4: // Holster
+            break;
+
+        case 5: // Draw
+            if (AnimSequenceWrap)
+            {
+                // Back to idle.
+                state.ActiveWeaponSequNr =0;
+                state.ActiveWeaponFrameNr=0.0;
+            }
+            break;
+
+        case 2: // Fire
+            if (!AnimSequenceWrap) break;
+
+            // Back to idle.
+            state.ActiveWeaponSequNr =0;
+            state.ActiveWeaponFrameNr=0.0;
+            // Intentional fall-through.
+
+        case 0: // Idle 1
+        case 6: // Idle 2
+        case 7: // Idle 3
+        case 1: // Fidget 1
+        {
+            // 1. First see if the magazine is empty and special action is required.
+            if (!state.HaveAmmoInWeapons[mWeaponId])
+            {
+                if (state.HaveAmmo[mWeaponId])
+                {
+                    state.ActiveWeaponSequNr =3;    // Reload
+                    state.ActiveWeaponFrameNr=0.0;
+                    break;
+                }
+
+                if (PlayerCommand.Keys & PCK_Fire1)
+                {
+                    // TODO: State.Events^=(1 << EventID_PrimaryFireEmpty);     // BUT LIMIT THE "FREQUENCY" OF THIS EVENT!
+                    break;
+                }
+            }
+
+            // 2. Are we to fire a bullet (we have at least one)?
+            if (PlayerCommand.Keys & PCK_Fire1)
+            {
+                state.ActiveWeaponSequNr =2;                // Fire
+                state.ActiveWeaponFrameNr=0.0;
+                state.HaveAmmoInWeapons[mWeaponId]--;
+                state.Events^=(1 << EntHumanPlayerT::EventID_PrimaryFire);   // Flip event flag.
+
+                if (ThinkingOnServerSide)
+                {
+                    // If we are on the server-side, find out what or who we hit.
+                    const float ViewDirZ=-LookupTables::Angle16ToSin[state.Pitch];
+                    const float ViewDirY= LookupTables::Angle16ToCos[state.Pitch];
+
+                    const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[state.Heading], ViewDirY*LookupTables::Angle16ToCos[state.Heading], ViewDirZ);
+
+                    RayResultT RayResult(Player->GetRigidBody());
+                    Player->PhysicsWorld->TraceRay(state.Origin/1000.0, scale(ViewDir, 9999999.0/1000.0), RayResult);
+
+                    if (RayResult.hasHit() && RayResult.GetHitEntity()!=NULL)
+                        RayResult.GetHitEntity()->TakeDamage(Player, 7, ViewDir);
+                }
+                break;
+            }
+
+            // 3. If nothing else has happened, just choose another sequence number on sequence wrap.
+            if (AnimSequenceWrap)
+            {
+                const char RandomNumber=char(LookupTables::RandomUShort[PlayerCommand.Nr & 0xFFF]);
+
+                     if (RandomNumber< 96) state.ActiveWeaponSequNr=0;  // Idle 1
+                else if (RandomNumber<192) state.ActiveWeaponSequNr=6;  // Idle 2
+                else if (RandomNumber<224) state.ActiveWeaponSequNr=7;  // Idle 3
+                else                       state.ActiveWeaponSequNr=1;  // Fidget 1
+
+                state.ActiveWeaponFrameNr=0.0;
+            }
+            break;
+        }
+    }
 }
 
 void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const VectorT& LastSeenAmbientColor) const
@@ -124,7 +224,7 @@ void WeaponT::ClientSide_HandleStateDrivenEffects(const EntHumanPlayerT* Player)
 
 bool WeaponT::ParticleFunction_ShotHitWall(ParticleMST *particle, float time)
 {
-	const float MaxAge=0.4f;
+    const float MaxAge=3.0f;
 	
 	particle->Age+=time;
 	if (particle->Age>MaxAge) return false;
@@ -132,26 +232,26 @@ bool WeaponT::ParticleFunction_ShotHitWall(ParticleMST *particle, float time)
 	const float p=1.0f-particle->Age/MaxAge;     // % of remaining lifetime
 	
 	particle->Color[0]=char( 20.0f*p);
-	particle->Color[1]=char(255.0f*p);
-	particle->Color[2]=char(180.0f*p);
+    particle->Color[1]=char(180.0f*p);
+    particle->Color[2]=char(255.0f*p);
 	
 	return true;
 }
 
 bool WeaponT::ParticleFunction_HitEntity(ParticleMST *particle, float time)
 {
-	const float MaxAge=1.0;
-	
-	particle->Age+=time;
-	if (particle->Age>MaxAge) return false;
-	
-	const float p=1.0f-particle->Age/MaxAge;     // % of remaining lifetime.
-	
-	particle->Color[0]=char(255.0f*p);
-	particle->Color[1]=0;
-	particle->Color[2]=0;
-	
-	return true;
+    const float MaxAge=1.0f;
+
+    particle->Age+=time;
+    if (particle->Age>MaxAge) return false;
+
+    const float p=1.0f-particle->Age/MaxAge;     // % of remaining lifetime.
+
+    particle->Color[0]=char(255.0f*p);
+    particle->Color[1]=0;
+    particle->Color[2]=0;
+
+    return true;
 }
 
 bool WeaponT::ParticleFunction_ShotWhiteSmoke(ParticleMST *particle, float time)
