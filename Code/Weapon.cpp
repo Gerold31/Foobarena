@@ -1,4 +1,4 @@
-#include "WeaponT.hpp"
+#include "Weapon.hpp"
 
 #include "ConsoleCommands/Console.hpp"
 #include "_ResourceManager.hpp"

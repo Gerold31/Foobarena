@@ -32,7 +32,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Libs/LookupTables.hpp"
 #include "Libs/Physics.hpp"
 #include "ConsoleCommands/Console.hpp"
-#include "WeaponT.hpp"
+#include "Weapon.hpp"
 
 #include "SoundSystem/SoundSys.hpp"
 #include "../../GameWorld.hpp"

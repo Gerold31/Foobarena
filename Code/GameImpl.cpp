@@ -31,7 +31,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
 #include "_ResourceManager.hpp"
-#include "WeaponT.hpp"
+#include "Weapon.hpp"
 
 #include "ConsoleCommands/Console.hpp"
 
