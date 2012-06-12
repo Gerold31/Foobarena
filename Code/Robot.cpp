@@ -227,6 +227,9 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             part->State.Health = weaponHealth;
             part->setParent(this);
             part->setPartType(EntRobotPartT::RobotPartWeapon);
+            part->State.Velocity.x = file->getDouble("barrelposx");
+            part->State.Velocity.y = file->getDouble("barrelposy");
+            part->State.Velocity.z = file->getDouble("barrelposz");
             mPart.push_back(part);
         }
 
@@ -285,7 +288,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         if(movementCount / mMovementCount > 0.5)
         {
   //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-  //          State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
+            State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
   //          State.Heading = 3 << 13;
         }else
         {
@@ -309,8 +312,11 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                 {
                     for(int i=0; i<mPart.size(); i++)
                     {
+                        if(mPart.at(i));
                         if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
                         {
+                            Console->DevPrint((char *)(TelaString("Velocity: ") + mPart.at(i)->State.Velocity.x + " " + mPart.at(i)->State.Velocity.y + "  " + mPart.at(i)->State.Velocity.z + "\n"));
+                            Vector3dT pos = mPart.at(i)->State.Origin + mPart.at(i)->State.Velocity.GetRotX(mSlotRot.at(i).x).GetRotY(mSlotRot.at(i).y).GetRotZ(90-mSlotRot.at(i).z-mPart.at(i)->State.Heading *45.0f/8192.0f)*25;
                             Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
                             mPart.at(i)->playAnimation("Shot");
 
@@ -325,9 +331,9 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                             props["NumberOfParticles"] = TelaString((0.1/mFirerate)/0.001).c_str();
                             props["ParticleVelocity"] = "0 0 2000";
 
-                            unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, mPart.at(i)->State.Origin);
+                            unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, pos);
                             EntSmokeT *smoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
-                            smoke->State.Origin = mPart.at(i)->State.Origin;
+                            smoke->State.Origin = pos;
                         }
                     }
                     mTimeSinceLastShot = 0;
