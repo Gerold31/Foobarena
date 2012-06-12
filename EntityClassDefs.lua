@@ -302,3 +302,120 @@ EntityClassDefs["info_player_start"]=newEntClassDef(Common, Angles,
     size       ={ { -16, -16, -36 }, { 16, 16, 36 } };      -- Rename in editor_bbox? Rename color in editor_bbox_color?
     color      ={ 0, 255, 0 };
 })
+
+
+
+EntityClassDefs["Robot"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotT";
+    description="Robot";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+
+    TorsoID=
+    {
+        type       ="integer";
+        description="TorsoID";
+		value      =0;
+    };
+	
+    HeadID=
+    {
+        type       ="integer";
+        description="HeadID";
+		value      =0;
+    };
+	
+    WeaponID=
+    {
+        type       ="integer";
+        description="WeaponID";
+		value      =0;
+    };
+	
+    MovementID=
+    {
+        type       ="integer";
+        description="MovementID";
+		value      =0;
+    };
+	
+})
+
+EntityClassDefs["RobotPart"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotPartT";
+    description="RobotPart";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+	
+    model=
+    {
+        type       ="file_model";
+        description="Model file name";
+    };
+
+    collisionModel=
+    {
+        type       ="file";
+        description="Collision Model file name";
+    };
+})
+
+
+EntityClassDefs["Smoke"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntSmokeT";
+    description="Smoke";
+    size       ={ { -16, -16, -36 }, { 16, 16, 36 } };
+	
+	StartSize=
+	{
+		type		="integer";
+		description	="StartSize";
+		value 		=1000;
+	};
+	
+	EndSize=
+	{
+		type		="integer";
+		description	="EndSize";
+		value 		=1000;
+	};
+	
+	LifeTime=
+	{
+		type		="float";
+		description	="LifeTime (in sec)";
+		value 		=10.0;
+	};
+	
+	ParticleSpawnTime=
+	{
+		type		="float";
+		description	="ParticleSpawnTime (in sec)";
+		value 		=0.1;
+	};
+	
+	Color=
+	{
+		type		="string";
+		description	="Color";
+		value 		="255 255 255 127";
+	};
+	
+	NumberOfParticles=
+	{
+		type		="integer";
+		description	="NumberOfParticles";
+		value 		=10;
+	};
+	
+	ParticleVelocity=
+	{
+		type		="string";
+		description	="ParticleVelocity";
+		value 		="0 0 0";
+	};	
+})

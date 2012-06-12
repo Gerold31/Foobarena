@@ -19,7 +19,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 =================================================================================
 */
 
-#include "../../BaseEntity.hpp"
+#include "BaseEntity.hpp"
 #include "../../GameWorld.hpp"
 #include "EntityCreateParams.hpp"
 #include "ScriptState.hpp"
@@ -54,7 +54,7 @@ cf::TypeSys::TypeInfoManT& GetBaseEntTIM()
 EntityStateT::EntityStateT(const VectorT& Origin_, const VectorT& Velocity_, const BoundingBox3T<double>& Dimensions_,
                            unsigned short Heading_, unsigned short Pitch_, unsigned short Bank_,
                            char StateOfExistance_, char Flags_, char ModelIndex_, char ModelSequNr_, float ModelFrameNr_,
-                           char Health_, char Armor_, unsigned long HaveItems_, unsigned long HaveWeapons_,
+                           short Health_, char Armor_, unsigned long HaveItems_, unsigned long HaveWeapons_,
                            char ActiveWeaponSlot_, char ActiveWeaponSequNr_, float ActiveWeaponFrameNr_)
     : Origin(Origin_),
       Velocity(Velocity_),
@@ -192,7 +192,7 @@ void BaseEntityT::Serialize(cf::Network::OutStreamT& Stream) const
     Stream << State.ModelIndex;
     Stream << State.ModelSequNr;
     Stream << State.ModelFrameNr;
-    Stream << State.Health;
+    Stream << (uint32_t)State.Health;
     Stream << State.Armor;
     Stream << uint32_t(State.HaveItems);
     Stream << uint32_t(State.HaveWeapons);
@@ -231,7 +231,7 @@ void BaseEntityT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
     Stream >> State.ModelIndex;
     Stream >> State.ModelSequNr;
     Stream >> State.ModelFrameNr;
-    Stream >> State.Health;
+    Stream >> ui; State.Health = ui;
     Stream >> State.Armor;
     Stream >> ui; State.HaveItems=ui;
     Stream >> ui; State.HaveWeapons=ui;
