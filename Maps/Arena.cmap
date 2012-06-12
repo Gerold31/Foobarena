@@ -5,9 +5,10 @@ Version 13
 
 {
   classname "worldspawn"
-  mru_mat_0 "Terrains/flat_dk_bump.png"
+  mru_mat_0 "Textures/meta/nonexistent"
   mru_mat_1 "Terrains/flat_dk_bump.png"
   mru_mat_2 "Terrains/flat_dk_bump.png"
+  mru_mat_3 "Terrains/flat_dk_bump.png"
 
 TerrainDef
 {
@@ -624,34 +625,29 @@ TerrainDef
 }
 
 {
-  classname "Robot"
-  TorsoID "2"
+  classname "RobotSpawner"
+  name "RobotSpawner_001"
   angles "-0 90 -0"
-  name "Robot_001"
-  HeadID "2"
-  WeaponID "2"
-  MovementID "2"
-  origin "352 -8 40"
+  origin "0 2496 32"
 }
 
 {
-  classname "Robot"
-  WeaponID "1"
-  TorsoID "1"
+  classname "RobotSpawner"
+  name "RobotSpawner_002"
   angles "-0 90 -0"
-  MovementID "1"
-  name "Robot_002"
-  HeadID "1"
-  origin "360 160 32"
+  origin "2480 0 32"
 }
 
 {
-  classname "Robot"
-  WeaponID "1"
-  TorsoID "3"
+  classname "RobotSpawner"
+  name "RobotSpawner_003"
   angles "-0 90 -0"
-  MovementID "2"
-  name "Robot_003"
-  HeadID "1"
-  origin "360 -176 32"
+  origin "0 -2488 32"
+}
+
+{
+  classname "RobotSpawner"
+  name "RobotSpawner_004"
+  angles "-0 90 -0"
+  origin "-2496 0 32"
 }
