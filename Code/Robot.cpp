@@ -303,9 +303,12 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     {
         if(movementCount / mMovementCount > 0.5)
         {
+            Vector3dT oldPos = State.Origin;
   //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
             State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
   //          State.Heading = 3 << 13;
+
+            State.Velocity = State.Origin - oldPos;
         }else
         {
             /// @todo tilt robot or break all other movements and move robot to ground
@@ -358,7 +361,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                             {
                                 mSound->SetPosition(pos);
                                 mSound->SetDirection(pos - mPart.at(i)->State.Origin);
-                                mSound->SetVelocity(Vector3dT());
+                                mSound->SetVelocity(State.Velocity);
                                 mSound->Play();
                             }
 

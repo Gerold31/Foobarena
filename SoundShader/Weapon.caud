@@ -11,3 +11,10 @@ Weapon/Shotgun_Shot
     MinDistance 5.0
     InnerVolume 1.0
 }
+
+Weapon/GLauncher_Shot
+{
+	AudioFile 	Sounds/GLauncher_Shot.wav
+    MinDistance 5.0
+    InnerVolume 1.0
+}
