@@ -15,7 +15,7 @@ Meshes=
 	-- Mesh 0
 	{
 		name="robot_head_2";
-		Material="Material";
+		Material="Models/Robot/Robot_Head_2";
 		tsMethod="GLOBAL";
 		castShadows=true;
 

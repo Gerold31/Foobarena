@@ -13,7 +13,7 @@ Meshes=
 	-- Mesh 0
 	{
 		name="robot_movement_wheel_1";
-		Material="wire-frame";
+		Material="Models/Robot/Robot_Movement_1";
 		tsMethod="GLOBAL";
 		castShadows=true;
 

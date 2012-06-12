@@ -12,11 +12,14 @@
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
 
+#include "Smoke.hpp"
+
 #include "TelaString.hpp"
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
-#define WEAPON_PATH(s) (std::string("Games/Foobarena/Models/Weapons/") + s + "/" + s + "_v.cmdl")
+#define BASE_PATH std::string("Games/Foobarena/")
+#define WEAPON_PATH(s) (BASE_PATH + "Models/Weapons/" + s + "/" + s + "_v.cmdl")
 #define WEAPON_DEFAULT "DesertEagle"
 
 WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weaponId) : mWeaponId(weaponId)
@@ -25,15 +28,14 @@ WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weapo
 	std::ifstream f(WEAPON_PATH(weaponName).c_str());
 	if(!f.is_open())
 	{
-        Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to WEAPON_DEFAULT");
+        Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to" + WEAPON_DEFAULT);
 		weaponName = WEAPON_DEFAULT;
 	}
     mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));
 
-    modelManager->GetModel(std::string("Games/Foobarena/Models/Items/Ammo_") + weaponName + "/Ammo_" + weaponName + ".cmdl");
+    modelManager->GetModel(BASE_PATH + "Models/Items/Ammo_" + weaponName + "/Ammo_" + weaponName + ".cmdl");
 	
-	mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(std::string("Weapon/") + weaponName + "_Shot"));
-	
+    mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(BASE_PATH + "Sounds/" + weaponName + "_Shot.wav"));
 }
 
 WeaponT::~WeaponT()
@@ -78,12 +80,42 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             break;
 
         case 2: // Fire
+        {
             if (!AnimSequenceWrap) break;
+
+            const unsigned short Pitch   = state.Pitch  +(rand() % 200)-100;
+            const unsigned short Heading = state.Heading+(rand() % 200)-100;
+            const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
+            const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
+            const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+
+            //create smoking barrel effect
+            std::map<std::string, std::string> props;
+            props["classname"] = "Smoke";
+            props["StartSize"] = "10";
+            props["EndSize"] = "100";
+            props["LifeTime"] = "0.1";
+            props["ParticleSpawnTime"] = "0.01";
+            props["Color"] = "127 127 127 255";
+            props["NumberOfParticles"] = "10";
+            props["ParticleVelocity"] = "0 0 2000";
+
+            unsigned long id = Player->GameWorld->CreateNewEntity(props, ServerFrameNr, state.Origin);
+            EntSmokeT *smoke = (EntSmokeT *)Player->GameWorld->GetBaseEntityByID(id);
+
+            smoke->State.Origin[0] = float(state.Origin.x+ViewDir.x*400.0+130.0);
+            smoke->State.Origin[1] = float(state.Origin.y+ViewDir.y*400.0);
+            smoke->State.Origin[2] = float(state.Origin.z+ViewDir.z*400.0-90.0);
+
+            // Update sound position and velocity.
+            mShotSound->SetPosition(state.Origin+scale(ViewDir, 400.0));
+            mShotSound->SetVelocity(state.Velocity);
 
             // Back to idle.
             state.ActiveWeaponSequNr =0;
             state.ActiveWeaponFrameNr=0.0;
             // Intentional fall-through.
+        }
 
         case 0: // Idle 1
         case 6: // Idle 2
@@ -125,6 +157,14 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
 
                     RayResultT RayResult(Player->GetRigidBody());
                     Player->PhysicsWorld->TraceRay(state.Origin/1000.0, scale(ViewDir, 9999999.0/1000.0), RayResult);
+
+                    // debug
+                    if(RayResult.hasHit())
+                        Console->DevPrint("hit ");
+                    if(RayResult.GetHitEntity())
+                        Console->Print("an entity!\n");
+                    else
+                        Console->Print("NULL\n");
 
                     if (RayResult.hasHit() && RayResult.GetHitEntity()!=NULL)
                         RayResult.GetHitEntity()->TakeDamage(Player, 7, ViewDir);
@@ -188,7 +228,7 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 		ParticleEngineMS::RegisterNewParticle(NewParticle);
 	}
 	
-	// Register a new particle as "muzzle flash".
+/*	// Register a new particle as "muzzle flash".
 	ParticleMST NewParticle;
 	
 	NewParticle.Origin[0] = float(State.Origin.x+ViewDir.x*400.0);
@@ -211,14 +251,10 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 	NewParticle.RenderMat = ResMan.RenderMats[ResMan.PARTICLE_WHITESMOKE_FRAME1];
 	NewParticle.MoveFunction = ParticleFunction_ShotWhiteSmoke;
 	
-	ParticleEngineMS::RegisterNewParticle(NewParticle);
-	
-	// Update sound position and velocity.
-	mShotSound->SetPosition(State.Origin+scale(ViewDir, 400.0));
-	mShotSound->SetVelocity(State.Velocity);
-	
+    ParticleEngineMS::RegisterNewParticle(NewParticle);*/
+
 	// Play the fire sound.
-	mShotSound->Play();
+    mShotSound->Play();
 }
 
 void WeaponT::ClientSide_HandleStateDrivenEffects(const EntHumanPlayerT* Player) const

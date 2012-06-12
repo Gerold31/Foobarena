@@ -843,10 +843,10 @@ void EntHumanPlayerT::ProcessEvent(char EventID)
 {
     // GameWorld->PrintDebug("Entity %3u: ProcessEvent(%u)", TypeID, EventID);
 
- //   switch (EventID)
+    switch (EventID)
     {
-    //    case EventID_PrimaryFire  : cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandlePrimaryFireEvent  (this, LastSeenAmbientColor); break;
-    //    case EventID_SecondaryFire: cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandleSecondaryFireEvent(this, LastSeenAmbientColor); break;
+        case EventID_PrimaryFire  : cf::GameSys::GameImplT::GetInstance().getWeapon()->ClientSide_HandleFireEvent  (this, LastSeenAmbientColor); break;
+//        case EventID_SecondaryFire: cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandleSecondaryFireEvent(this, LastSeenAmbientColor); break;
     }
 }
 
