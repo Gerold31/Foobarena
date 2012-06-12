@@ -1,0 +1,6 @@
+Textures/cement_1_grimy
+{
+    diffusemap  Textures/cement_1_grimy_diff.png
+    normalmap   Textures/cement_1_grimy_norm.png
+    lightmap    $lightmap
+}
