@@ -103,6 +103,7 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             unsigned long id = Player->GameWorld->CreateNewEntity(props, ServerFrameNr, state.Origin);
             EntSmokeT *smoke = (EntSmokeT *)Player->GameWorld->GetBaseEntityByID(id);
 
+//            smoke->State.Origin = state.Origin + Vector3dT(130, 50, -90).GetRotY((-state.Pitch) *45.0f/8192.0).GetRotZ(state.Heading *45.0f/8192.0f);
             smoke->State.Origin[0] = float(state.Origin.x+ViewDir.x*400.0+130.0);
             smoke->State.Origin[1] = float(state.Origin.y+ViewDir.y*400.0);
             smoke->State.Origin[2] = float(state.Origin.z+ViewDir.z*400.0-90.0);
