@@ -1,6 +1,6 @@
 Models/Robot/Robot_Torso_3
 {
-    diffusemap  Textures/generic/_black_diff.png
+    diffusemap  ../../Textures/generic/_black_diff.png
 	lightmap    $lightmap
 }
 
