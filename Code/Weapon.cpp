@@ -16,7 +16,8 @@
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
-#define WEAPON_PATH(s) (std::string("Games/Foobarena/Models/Weapons/") + s + "/" + s + "_v.cmdl")
+#define BASE_PATH std::string("Games/Foobarena/")
+#define WEAPON_PATH(s) (BASE_PATH + "Models/Weapons/" + s + "/" + s + "_v.cmdl")
 #define WEAPON_DEFAULT "DesertEagle"
 
 WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weaponId) : mWeaponId(weaponId)
@@ -25,15 +26,14 @@ WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weapo
 	std::ifstream f(WEAPON_PATH(weaponName).c_str());
 	if(!f.is_open())
 	{
-        Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to WEAPON_DEFAULT");
+        Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to" + WEAPON_DEFAULT);
 		weaponName = WEAPON_DEFAULT;
 	}
     mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));
 
-    modelManager->GetModel(std::string("Games/Foobarena/Models/Items/Ammo_") + weaponName + "/Ammo_" + weaponName + ".cmdl");
+    modelManager->GetModel(BASE_PATH + "Models/Items/Ammo_" + weaponName + "/Ammo_" + weaponName + ".cmdl");
 	
-	mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(std::string("Weapon/") + weaponName + "_Shot"));
-	
+    mShotSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(BASE_PATH + "Sounds/" + weaponName + "_Shot.wav"));
 }
 
 WeaponT::~WeaponT()
@@ -159,6 +159,8 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
 
 void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const VectorT& LastSeenAmbientColor) const
 {
+    Console->DevPrint("WeaponT::ClientSide_HandleFireEvent\n");
+
 	const EntityStateT& State = Player->State;
 	
 	const unsigned short Pitch   = State.Pitch  +(rand() % 200)-100;
@@ -221,12 +223,12 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 	
 	ParticleEngineMS::RegisterNewParticle(NewParticle);
 	
-	// Update sound position and velocity.
-	mShotSound->SetPosition(State.Origin+scale(ViewDir, 400.0));
+    // Update sound position and velocity.
+    mShotSound->SetPosition(State.Origin+scale(ViewDir, 400.0));
 	mShotSound->SetVelocity(State.Velocity);
 	
 	// Play the fire sound.
-	mShotSound->Play();
+    mShotSound->Play();
 }
 
 void WeaponT::ClientSide_HandleStateDrivenEffects(const EntHumanPlayerT* Player) const
