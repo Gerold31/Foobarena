@@ -126,6 +126,14 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
                     RayResultT RayResult(Player->GetRigidBody());
                     Player->PhysicsWorld->TraceRay(state.Origin/1000.0, scale(ViewDir, 9999999.0/1000.0), RayResult);
 
+                    // debug
+                    if(RayResult.hasHit())
+                        Console->DevPrint("hit ");
+                    if(RayResult.GetHitEntity())
+                        Console->Print("an entity!\n");
+                    else
+                        Console->Print("NULL\n");
+
                     if (RayResult.hasHit() && RayResult.GetHitEntity()!=NULL)
                         RayResult.GetHitEntity()->TakeDamage(Player, 7, ViewDir);
                 }
