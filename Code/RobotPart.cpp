@@ -155,6 +155,8 @@ void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 {
     const int SequNr=(mSequNr==255) ? -1 : mSequNr;   // This is a hack, because mSequNr actually has the wrong (unsigned) datatype...
 
+    if(SequNr == -1) return;
+
     if (SequNr != mLastStdAE->GetSequNr())
     {
   //      if (mPlayAnim)
@@ -225,6 +227,11 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
 
 bool EntRobotPartT::playAnimation(string name)
 {
+    if(name == "")
+    {
+        mSequNr = -1;
+        return true;
+    }
     ArrayT<CafuModelT::AnimT> anims = mModel->GetAnims();
     for(int i=0; i<anims.Size(); i++)
     {
