@@ -15,7 +15,7 @@ Meshes=
 	-- Mesh 0
 	{
 		name="Cube.001";
-		Material="wire-frame";
+		Material="Models/Robot/Robot_Torso_3";
 		tsMethod="GLOBAL";
 		castShadows=true;
 

@@ -1,2 +1,7 @@
+Models/Robot/Robot_Head_1
+{
+    diffusemap  Textures/generic/_black_diff.png
+	lightmap    $lightmap
+}
 
 dofile("robot_head_1_editor.cmat")
