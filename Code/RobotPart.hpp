@@ -23,6 +23,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #define _ROBOTPART_HPP_
 
 #include "BaseEntity.hpp"
+#include "Models/AnimExpr.hpp"
 
 class CafuModelT;
 class EntityCreateParamsT;
@@ -50,7 +51,7 @@ public:
     void Think(float FrameTime, unsigned long ServerFrameNr);
     void Draw(bool FirstPersonView, float LodDist) const;
     void PostDraw(float FrameTime, bool FirstPersonView);
-	void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
+    void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
 
     void Serialize(cf::Network::OutStreamT& Stream) const;
     void Deserialize(cf::Network::InStreamT& Stream, bool IsIniting=false);
@@ -63,11 +64,17 @@ public:
     void setPartType(int type) {mType = type;}
     int getPartType() {return mType;}
 
+    bool playAnimation(string name);
+
 protected:
     CafuModelT* mModel;
     string mModelName, mCollisionModelName;
     EntRobotT *mParent;
     int mType;
+
+    char  &mSequNr;
+    mutable IntrusivePtrT<AnimExpressionT>   mAnimExpr;
+    mutable IntrusivePtrT<AnimExprStandardT> mLastStdAE;
 };
 
 #endif

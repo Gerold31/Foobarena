@@ -78,6 +78,7 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
     State.Origin.z = 0;
     State.Heading = 1<<14;
     mSmoke = NULL;
+    mTimeSinceLastShot = 0;
 }
 
 EntRobotT::~EntRobotT()
@@ -285,7 +286,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         {
   //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
   //          State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
-            State.Heading = 3 << 13;
+  //          State.Heading = 3 << 13;
         }else
         {
             /// @todo tilt robot or break all other movements and move robot to ground
@@ -294,6 +295,45 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         if(headCount > 0)
         {
             // look for player
+            if(weaponCount > 0)
+            {
+                /// @todo aim
+
+                // shoot
+                /// @todo actual shot
+                // play Animation
+
+                // all guns blazing
+                mTimeSinceLastShot += FrameTime;
+                if(mTimeSinceLastShot >= 1.0/mFirerate)
+                {
+                    for(int i=0; i<mPart.size(); i++)
+                    {
+                        if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
+                        {
+                            Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
+                            mPart.at(i)->playAnimation("Shot");
+
+                            //create smoking barrel effect
+                            std::map<std::string, std::string> props;
+                            props["classname"] = "Smoke";
+                            props["StartSize"] = TelaString(mDamage).c_str();
+                            props["EndSize"] = TelaString(10*mDamage).c_str();
+                            props["LifeTime"] = TelaString(0.1/mFirerate).c_str();
+                            props["ParticleSpawnTime"] = "0.01";
+                            props["Color"] = "127 127 127 255";
+                            props["NumberOfParticles"] = TelaString((0.1/mFirerate)/0.001).c_str();
+                            props["ParticleVelocity"] = "0 0 2000";
+
+                            unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, mPart.at(i)->State.Origin);
+                            EntSmokeT *smoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
+                            smoke->State.Origin = mPart.at(i)->State.Origin;
+                        }
+                    }
+                    mTimeSinceLastShot = 0;
+                }
+            }
+
         }
 
         // debug

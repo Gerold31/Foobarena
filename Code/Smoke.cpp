@@ -122,9 +122,6 @@ void EntSmokeT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
         createParticle();
         mTimeSinceLastParticle = 0;
     }
-
-
-
 }
 
 
@@ -161,6 +158,7 @@ bool EntSmokeT::ParticleFunction(ParticleMST *particle, float time)
 
 void EntSmokeT::createParticle()
 {
+    if(State.Origin == Vector3dT()) return;
     ParticleMST NewParticle;
 
     NewParticle.Origin[0] = State.Origin.x;

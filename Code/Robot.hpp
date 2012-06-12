@@ -57,7 +57,7 @@ private:
     vector<Vector3dT> mSlotRot;
     int mHeadCount, mWeaponCount, mMovementCount;
     int mSpeed, mRange, mDamage;
-    double mFirerate;
+    double mFirerate, mTimeSinceLastShot;
     int mMovementRadius;
     bool mCreated;
 

@@ -33,7 +33,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "MaterialSystem/Renderer.hpp"
 #include "ClipSys/ClipModel.hpp"
 #include "ClipSys/CollisionModelMan.hpp"
-
+#include "TelaString.hpp"
 #include "Robot.hpp"
 
 // Implement the type info related code.
@@ -60,7 +60,7 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
                                        0,       // Pitch
                                        0,       // Bank
                                        0,       // StateOfExistance
-                                       0,       // Flags
+                                       1,       // Flags
                                        0,       // ModelIndex
                                        0,       // ModelSequNr
                                        0.0,     // ModelFrameNr
@@ -70,7 +70,10 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
                                        0,       // HaveWeapons
                                        0,       // ActiveWeaponSlot
                                        0,       // ActiveWeaponSequNr
-                                       0.0))    // ActiveWeaponFrameNr)
+                                       0.0)),    // ActiveWeaponFrameNr)
+      mSequNr(State.ModelSequNr),
+      mAnimExpr(),
+      mLastStdAE()
 {
     Console->DevPrint("EntRobotPartT::EntRobotPartT()\n");
     if(Params.Properties.count("model"))
@@ -78,6 +81,10 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
         mModelName = Params.Properties.find("model")->second;
         Console->DevPrint("model = " + mModelName + "\n");
         mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
+        mLastStdAE=mModel->GetAnimExprPool().GetStandard(mSequNr, 0.0f);
+        mLastStdAE->SetForceLoop(false);
+        mAnimExpr =mLastStdAE;
+        mSequNr   =mLastStdAE->GetSequNr();
     }else
     {
         Console->DevPrint("model = \"\"\n");
@@ -96,6 +103,7 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
         mCollisionModelName = "";
         //CollisionModel = NULL;
     }
+
     mParent = NULL;
     mType = 0;
 }
@@ -138,14 +146,38 @@ void EntRobotPartT::Draw(bool /*FirstPersonView*/, float LodDist) const
     MatSys::Renderer->SetCurrentLightSourcePosition(LgtPos.x, LgtPos.y, LgtPos.z);
     MatSys::Renderer->SetCurrentEyePosition(EyePos.x, EyePos.y, EyePos.z);
 
-
-    AnimPoseT* Pose=mModel->GetSharedPose(mModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr));
+    AnimPoseT* Pose=mModel->GetSharedPose(mAnimExpr);
     Pose->Draw(-1 /*default skin*/, LodDist);
 }
 
 
 void EntRobotPartT::PostDraw(float FrameTime, bool FirstPersonView)
 {
+    const int SequNr=(mSequNr==255) ? -1 : mSequNr;   // This is a hack, because mSequNr actually has the wrong (unsigned) datatype...
+
+    if (SequNr != mLastStdAE->GetSequNr())
+    {
+  //      if (mPlayAnim)
+        {
+            mLastStdAE=mModel->GetAnimExprPool().GetStandard(SequNr, 0.0f);
+            mLastStdAE->SetForceLoop(true);
+            mAnimExpr =mModel->GetAnimExprPool().GetBlend(mAnimExpr, mLastStdAE, 3.0f);
+        }
+ //       else
+        {
+            mLastStdAE->SetSequNr(mSequNr);
+        }
+
+        mSequNr=mLastStdAE->GetSequNr();  // Set mSequNr to the mLastStdAE's "normalized" value.
+    }
+
+//    Console->DevPrint((char *)(TelaString("Client: ") + mModelName + (int)mPlayAnim + "\n"));
+
+//    if (mPlayAnim)
+    {
+        // Advance the client-local animation.
+        mAnimExpr->AdvanceTime(FrameTime);
+    }
 }
 
 
@@ -164,6 +196,7 @@ void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const
 
 void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
 {
+    char c;
     BaseEntityT::Deserialize(Stream, IsIniting);
     Stream >> mModelName;
     Stream >> mCollisionModelName;
@@ -171,6 +204,10 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
     {
         Console->DevPrint("Deserialize: model = " + mModelName + "\n");
         mModel = const_cast<CafuModelT *>(GameWorld->GetModel("Games/Foobarena/" + mModelName));
+        mLastStdAE=mModel->GetAnimExprPool().GetStandard(mSequNr, 0.0f);
+        mLastStdAE->SetForceLoop(true);
+        mAnimExpr =mLastStdAE;
+        mSequNr   =mLastStdAE->GetSequNr();
     }
     if(!CollisionModel)
     {
@@ -184,4 +221,19 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
                            * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
                            * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
     ClipModel.Register();
+}
+
+bool EntRobotPartT::playAnimation(string name)
+{
+    ArrayT<CafuModelT::AnimT> anims = mModel->GetAnims();
+    for(int i=0; i<anims.Size(); i++)
+    {
+        if(anims[i].Name == name)
+        {
+            mSequNr = i;
+            Console->DevPrint((char *)((TelaString("seq: ") + anims[i].Name + " Frames: " + (long)anims[i].Frames.Size() + "\n")));
+            return true;
+        }
+    }
+    return false;
 }
