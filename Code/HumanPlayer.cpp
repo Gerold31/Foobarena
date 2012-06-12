@@ -825,7 +825,7 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 for (char Nr=0; Nr<15; Nr++) State.HaveAmmo         [Nr]=0;   // IMPORTANT: Do not clear the frags value in 'HaveAmmo[AMMO_SLOT_FRAGS]'!
                 for (char Nr=0; Nr<32; Nr++) State.HaveAmmoInWeapons[Nr]=0;
-                State.HaveAmmo[0] = 6;
+                State.HaveAmmo[0] = 60;
                 State.HaveAmmoInWeapons[0] = 6;
                 break;
             }
