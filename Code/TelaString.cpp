@@ -129,7 +129,7 @@ TelaString &TelaString::operator=(double input)
 	content.clear();
 	bool negative = false;
 	bool all0 = true;
-    long n = (long)input * 100000;
+    long n = (long)(input * 100000);
 	if(n == 0)
 	{
 		content.push_back(48);
