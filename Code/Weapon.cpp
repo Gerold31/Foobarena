@@ -12,6 +12,8 @@
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
 
+#include "Smoke.hpp"
+
 #include "TelaString.hpp"
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
@@ -78,12 +80,42 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             break;
 
         case 2: // Fire
+        {
             if (!AnimSequenceWrap) break;
+
+            const unsigned short Pitch   = state.Pitch  +(rand() % 200)-100;
+            const unsigned short Heading = state.Heading+(rand() % 200)-100;
+            const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
+            const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
+            const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+
+            //create smoking barrel effect
+            std::map<std::string, std::string> props;
+            props["classname"] = "Smoke";
+            props["StartSize"] = "10";
+            props["EndSize"] = "100";
+            props["LifeTime"] = "0.1";
+            props["ParticleSpawnTime"] = "0.01";
+            props["Color"] = "127 127 127 255";
+            props["NumberOfParticles"] = "10";
+            props["ParticleVelocity"] = "0 0 2000";
+
+            unsigned long id = Player->GameWorld->CreateNewEntity(props, ServerFrameNr, state.Origin);
+            EntSmokeT *smoke = (EntSmokeT *)Player->GameWorld->GetBaseEntityByID(id);
+
+            smoke->State.Origin[0] = float(state.Origin.x+ViewDir.x*400.0+130.0);
+            smoke->State.Origin[1] = float(state.Origin.y+ViewDir.y*400.0);
+            smoke->State.Origin[2] = float(state.Origin.z+ViewDir.z*400.0-90.0);
+
+            // Update sound position and velocity.
+            mShotSound->SetPosition(state.Origin+scale(ViewDir, 400.0));
+            mShotSound->SetVelocity(state.Velocity);
 
             // Back to idle.
             state.ActiveWeaponSequNr =0;
             state.ActiveWeaponFrameNr=0.0;
             // Intentional fall-through.
+        }
 
         case 0: // Idle 1
         case 6: // Idle 2
@@ -159,8 +191,6 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
 
 void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const VectorT& LastSeenAmbientColor) const
 {
-    Console->DevPrint("WeaponT::ClientSide_HandleFireEvent\n");
-
 	const EntityStateT& State = Player->State;
 	
 	const unsigned short Pitch   = State.Pitch  +(rand() % 200)-100;
@@ -198,7 +228,7 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 		ParticleEngineMS::RegisterNewParticle(NewParticle);
 	}
 	
-	// Register a new particle as "muzzle flash".
+/*	// Register a new particle as "muzzle flash".
 	ParticleMST NewParticle;
 	
 	NewParticle.Origin[0] = float(State.Origin.x+ViewDir.x*400.0);
@@ -221,12 +251,8 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 	NewParticle.RenderMat = ResMan.RenderMats[ResMan.PARTICLE_WHITESMOKE_FRAME1];
 	NewParticle.MoveFunction = ParticleFunction_ShotWhiteSmoke;
 	
-	ParticleEngineMS::RegisterNewParticle(NewParticle);
-	
-    // Update sound position and velocity.
-    mShotSound->SetPosition(State.Origin+scale(ViewDir, 400.0));
-	mShotSound->SetVelocity(State.Velocity);
-	
+    ParticleEngineMS::RegisterNewParticle(NewParticle);*/
+
 	// Play the fire sound.
     mShotSound->Play();
 }
