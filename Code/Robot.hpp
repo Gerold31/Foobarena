@@ -31,6 +31,7 @@ using namespace std;
 class EntityCreateParamsT;
 class EntRobotPartT;
 class EntSmokeT;
+class SoundI;
 
 class EntRobotT : public BaseEntityT
 {
@@ -60,6 +61,7 @@ private:
     double mFirerate, mTimeSinceLastShot;
     int mMovementRadius;
     bool mCreated;
+    SoundI* mSound;
 
     EntSmokeT *mSmoke;
 };

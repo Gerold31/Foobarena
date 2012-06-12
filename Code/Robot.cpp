@@ -29,6 +29,9 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "Math3D/Matrix.hpp"
 #include "ParticleEngine/ParticleEngineMS.hpp"
 #include "_ResourceManager.hpp"
+#include "SoundSystem/SoundSys.hpp"
+#include "SoundSystem/SoundShaderManager.hpp"
+#include "SoundSystem/Sound.hpp"
 
 #include "File.hpp"
 
@@ -90,6 +93,11 @@ EntRobotT::~EntRobotT()
     }
     if(mSmoke)
         GameWorld->RemoveEntity(mSmoke->ID);
+    mSmoke = NULL;
+    /*
+    if(mSound)
+        SoundSystem->DeleteSound(mSound);
+    */
 }
 
 void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
@@ -216,6 +224,14 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         weaponHealth = file->getInt("health");
         mDamage = file->getInt("damage");
         mFirerate = file->getDouble("firerate");
+        mSound = SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader(file->getStr("sound").c_str()));
+        if(mSound)
+        {
+            mSound->SetInnerConeAngle(90);
+            mSound->SetInnerVolume(1.0);
+            mSound->SetOuterConeAngle(180);
+            mSound->SetOuterVolume(0.5);
+        }
 
         propsWeapon["classname"]     ="RobotPart";
         propsWeapon["model"]         ="Models/Robot/robot_weapon_" + weaponID + ".cmdl";
@@ -302,9 +318,8 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             {
                 /// @todo aim
 
+
                 // shoot
-                /// @todo actual shot
-                // play Animation
 
                 // all guns blazing
                 mTimeSinceLastShot += FrameTime;
@@ -334,6 +349,17 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                             unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, pos);
                             EntSmokeT *smoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
                             smoke->State.Origin = pos;
+
+                            //play sound
+                            if(mSound)
+                            {
+                                mSound->SetPosition(pos);
+                                mSound->SetDirection(pos - mPart.at(i)->State.Origin);
+                                mSound->SetVelocity(Vector3dT());
+                                mSound->Play();
+                            }
+
+                            /// @todo actual shot
                         }
                     }
                     mTimeSinceLastShot = 0;

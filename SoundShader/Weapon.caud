@@ -1,0 +1,13 @@
+Weapon/9mm_Shot
+{
+    AudioFile   Sounds/9mm_Shot.wav
+    MinDistance 3.0
+    InnerVolume 0.9
+}
+
+Weapon/Shotgun_Shot
+{
+    AudioFile   Sounds/Shotgun_Shot.wav
+    MinDistance 5.0
+    InnerVolume 1.0
+}
