@@ -12,17 +12,20 @@
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
 
+#include "TelaString.hpp"
+
+#define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
 #define WEAPON_PATH(s) (std::string("Games/Foobarena/Models/Weapons/") + s + "/" + s + "_v.cmdl")
 #define WEAPON_DEFAULT "DesertEagle"
 
 WeaponT::WeaponT(ModelManagerT *modelManager, std::string weaponName, char weaponId) : mWeaponId(weaponId)
 {
-	Console->Print(std::string("[Dev] Created weapon \"") + weaponName + "\"");
+    PRINT_VAR(weaponName);
 	std::ifstream f(WEAPON_PATH(weaponName).c_str());
 	if(!f.is_open())
 	{
-		Console->Warning(std::string("[Warning] Couldn't find Weapon \"") + weaponName + "\" - falling back to WEAPON_DEFAULT");
+        Console->Warning(std::string("Couldn't find Weapon \"") + weaponName + "\" - falling back to WEAPON_DEFAULT");
 		weaponName = WEAPON_DEFAULT;
 	}
     mWeaponModel = modelManager->GetModel(WEAPON_PATH(weaponName));

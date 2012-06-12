@@ -70,7 +70,6 @@ cf::GameSys::GameImplT::GameImplT()
       Sv_PhysicsWorld(NULL),
       Cl_PhysicsWorld(NULL),
       ScriptState(NULL),
-      mWeapon(NULL),
       IsThinking(false)
 {
 }

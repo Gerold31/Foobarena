@@ -31,6 +31,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "PhysicsWorld.hpp"
 #include "Libs/LookupTables.hpp"
 #include "Libs/Physics.hpp"
+#include "ConsoleCommands/Console.hpp"
 #include "WeaponT.hpp"
 
 #include "SoundSystem/SoundSys.hpp"
@@ -57,6 +58,10 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _WIN32
 #define _stricmp strcasecmp
 #endif
+
+#include "TelaString.hpp"
+#define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
+#define PRINT_CHAR(x) Console->DevPrint((TelaString(#x) + " :" + (int)x + "\n").toString())
 
 
 // Constants for State.StateOfExistance.
@@ -406,7 +411,6 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                 // Handle the state machine of the "_v" (view) model of the current weapon.
                 if (State.HaveWeapons & (1 << State.ActiveWeaponSlot))
                 {
-
                     const WeaponT* weapon = cf::GameSys::GameImplT::GetInstance().getWeapon();
 
                     // Advance the frame time of the weapon.
@@ -811,9 +815,9 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                 State.Health             =100;
                 State.Armor              =0;
                 State.HaveItems          =0;
-                State.HaveWeapons        =0;
+                State.HaveWeapons        =1;
                 State.ActiveWeaponSlot   =0;
-                State.ActiveWeaponSequNr =0;
+                State.ActiveWeaponSequNr =5;
                 State.ActiveWeaponFrameNr=0.0;
 
                 ClipModel.SetOrigin(State.Origin);
@@ -821,6 +825,8 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 for (char Nr=0; Nr<15; Nr++) State.HaveAmmo         [Nr]=0;   // IMPORTANT: Do not clear the frags value in 'HaveAmmo[AMMO_SLOT_FRAGS]'!
                 for (char Nr=0; Nr<32; Nr++) State.HaveAmmoInWeapons[Nr]=0;
+                State.HaveAmmo[0] = 6;
+                State.HaveAmmoInWeapons[0] = 6;
                 break;
             }
 
