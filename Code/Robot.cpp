@@ -330,9 +330,12 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                         if(mPart.at(i));
                         if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
                         {
-                            Console->DevPrint((char *)(TelaString("Velocity: ") + mPart.at(i)->State.Velocity.x + " " + mPart.at(i)->State.Velocity.y + "  " + mPart.at(i)->State.Velocity.z + "\n"));
-                            Vector3dT pos = mPart.at(i)->State.Origin + mPart.at(i)->State.Velocity.GetRotX(mSlotRot.at(i).x).GetRotY(mSlotRot.at(i).y).GetRotZ(90-mSlotRot.at(i).z-mPart.at(i)->State.Heading *45.0f/8192.0f)*25;
-                            Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
+                            //Console->DevPrint((char *)(TelaString("Velocity: ") + mPart.at(i)->State.Velocity.x + " " + mPart.at(i)->State.Velocity.y + "  " + mPart.at(i)->State.Velocity.z + "\n"));
+                            Vector3dT pos = mPart.at(i)->State.Velocity;
+                            pos.z = 0;
+                            pos = mPart.at(i)->State.Origin + pos.GetRotY(mSlotRot.at(i).y).GetRotZ(90-mSlotRot.at(i).z-mPart.at(i)->State.Heading *45.0f/8192.0f)*25;
+                            pos.z += mPart.at(i)->State.Velocity.z*25;
+                            //Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
                             mPart.at(i)->playAnimation("Shot");
 
                             //create smoking barrel effect
