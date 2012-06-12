@@ -921,6 +921,11 @@ void EntHumanPlayerT::Draw(bool FirstPersonView, float LodDist) const
 
             MatSys::Renderer->SetCurrentLightSourcePosition(LgtPos.x, LgtPos.y, LgtPos.z);
             MatSys::Renderer->SetCurrentEyePosition(EyePos.x, EyePos.y, EyePos.z);
+			
+            const CafuModelT* WeaponModel=cf::GameSys::GameImplT::GetInstance().getWeapon()->getWeaponModel();
+            AnimPoseT*        Pose       =WeaponModel->GetSharedPose(WeaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr));
+
+            Pose->Draw(-1 /*default skin*/, LodDist);
         }
     }
 }
