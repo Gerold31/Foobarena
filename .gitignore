@@ -1,1 +1,4 @@
 build
+*.cmap_bak
+*.cmdl_bak
+*.cgui_bak

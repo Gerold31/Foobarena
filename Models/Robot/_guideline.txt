@@ -1,0 +1,26 @@
+head:
+	bigger -> higher range, less health
+
+torso:
+	bigger -> higher health, slower
+	
+movement:
+	wheel:
+		fast, less health
+	tracks:
+		slow, strong
+
+		
+	slotorder:
+			  ^				^x
+			  |				|
+		 ___________
+	0	|			|  1
+		|			|
+	2	|			|  3
+		|			|
+		|			|
+	4	|___________|  5
+	
+<---                         .z
+y

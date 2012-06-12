@@ -21,7 +21,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include "GameImpl.hpp"
 #include "Libs/LookupTables.hpp"
-#include "../../BaseEntity.hpp"     // Just for the one-time init of the TypeInfoMan.
+#include "BaseEntity.hpp"     // Just for the one-time init of the TypeInfoMan.
 
 #include "ClipSys/CollisionModelMan.hpp"
 #include "ConsoleCommands/ConsoleInterpreter.hpp"

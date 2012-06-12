@@ -1,0 +1,34 @@
+"Cube.001Mat"
+{
+    diffusemap file-not-found
+    twoSided
+    polygonMode wireframe
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}
+
+
+"CubeMat"
+{
+    diffusemap file-not-found
+    twoSided
+    polygonMode wireframe
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}
+
+
+"wire-frame"
+{
+    diffusemap file-not-found
+    twoSided
+    polygonMode wireframe
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}

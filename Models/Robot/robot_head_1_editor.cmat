@@ -1,0 +1,10 @@
+"Material"
+{
+    diffusemap file-not-found
+    twoSided
+    polygonMode wireframe
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}
