@@ -96,11 +96,11 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
     {
 
         mCollisionModelName = Params.Properties.find("collisionModel")->second;
-  /*      CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+mCollisionModelName);
+        CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+mCollisionModelName);
+        ClipModel.SetOrigin(State.Origin);
         ClipModel.SetCollisionModel(CollisionModel);
         ClipModel.SetUserData(this);
         ClipModel.Register();
-        */
     }else
     {
         mCollisionModelName = "";
@@ -219,11 +219,11 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
         mAnimExpr =mLastStdAE;
         mSequNr   =mLastStdAE->GetSequNr();
     }
-    if(mType == RobotPartTorso)
+//    if(mType == RobotPartTorso)
     {
         if(!CollisionModel)
         {
-            Console->DevPrint("Deserialize: collision model = " + mCollisionModelName + "\n");
+//            Console->DevPrint("Deserialize: collision model = " + mCollisionModelName + "\n");
             CollisionModel=cf::ClipSys::CollModelMan->GetCM("Games/Foobarena/"+mCollisionModelName);
             ClipModel.SetCollisionModel(CollisionModel);
             ClipModel.SetUserData(this);
