@@ -130,13 +130,15 @@ EntRobotSpawnerT::RobotInfoT::RobotInfoT(int torsoID, int headID, int weaponID, 
 
 map<string, string> EntRobotSpawnerT::RobotInfoT::toProperties()
 {
+    static int robots = 0;
     map<string, string> props;
     props["classname"] = "Robot";
-//    props["name"]      = "Robot";
+    props["name"]      = TelaString("Robot_") + robots;
     props["TorsoID"]   = TelaString(mTorsoID);
     props["HeadID"]    = TelaString(mHeadID);
     props["WeaponID"]  = TelaString(mWeaponID);
     props["MovementID"]= TelaString(mMovementID);
+    robots++;
     return props;
 }
 
