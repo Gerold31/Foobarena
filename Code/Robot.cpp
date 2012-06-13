@@ -37,8 +37,14 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #include "RobotPart.hpp"
 #include "Smoke.hpp"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
+
+#define ARENASIZE 45000.0
+
+#define LENGTH(a) (sqrt((a).x*(a).x + (a).y*(a).y))
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotT::GetType() const
@@ -306,9 +312,58 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             Vector3dT oldPos = State.Origin;
 
             /// @todo AI: move
-  //          State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
-            State.Heading += (unsigned short) ((1 << 16) / 30.0 *FrameTime);
-  //          State.Heading = 3 << 13;
+            double angle = atan2(-State.Origin.y, State.Origin.x)* 180.0 / M_PI; // should be atan2(y, x) but robot is moving sidewise
+
+            while(angle < 0)    angle += 360;
+            while(angle >=360)  angle -= 360;
+     //       PRINT_VAR(angle);
+     //       PRINT_VAR(LENGTH(State.Origin));
+
+            if(LENGTH(State.Origin) > ARENASIZE)
+            {
+         //       Console->DevPrint("in Spawn\n");
+                // get out of the spawn
+                if((angle > 355 || angle < 5) || (angle > 85 && angle < 95) || (angle > 175 && angle < 185) || (angle > 265 && angle < 275))
+                {
+                    State.Heading = angle+180;
+                }else if(angle >= 5 && angle <= 85)
+                {
+                    if(angle < 45)
+                        State.Heading = angle+180 + 90;
+                    else
+                        State.Heading = angle+180 - 90;
+                }
+                else if(angle >= 95 && angle <= 175)
+                {
+                    if(angle < 135)
+                        State.Heading = angle+180 + 90;
+                    else
+                        State.Heading = angle+180 - 90;
+                }
+                else if(angle >= 185 && angle <= 265)
+                {
+                    if(angle < 225)
+                        State.Heading = angle+180 + 90;
+                    else
+                        State.Heading = angle+180 - 90;
+                }
+                else if(angle >= 275 && angle <= 355)
+                {
+                    if(angle < 315)
+                        State.Heading = angle+180 + 90;
+                    else
+                        State.Heading = angle+180 - 90;
+                }
+                State.Heading *= 8192.0/45.0;
+            }else
+            {
+       //         Console->DevPrint("in Arena");
+                // debug
+                // drive clockwise cicles
+                State.Heading = angle+100;
+                State.Heading *= 8192.0/45.0;
+            }
+            State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
 
             State.Velocity = State.Origin - oldPos;
         }else

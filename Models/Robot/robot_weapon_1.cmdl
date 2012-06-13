@@ -16,7 +16,7 @@ Meshes=
 	-- Mesh 0
 	{
 		name="Cube_001";
-		Material="wire-frame";
+		Material="Models/Robot/Robot_Weapon_1";
 		tsMethod="GLOBAL";
 		castShadows=true;
 
@@ -63,7 +63,7 @@ Meshes=
 	-- Mesh 1
 	{
 		name="Cube";
-		Material="wire-frame";
+		Material="Models/Robot/Robot_Weapon_1";
 		tsMethod="GLOBAL";
 		castShadows=true;
 
