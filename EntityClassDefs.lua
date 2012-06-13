@@ -362,6 +362,14 @@ EntityClassDefs["RobotPart"]=newEntClassDef(Common, Angles,
     };
 })
 
+EntityClassDefs["RobotSpawner"]=newEntClassDef(Common, Angles,
+{
+    isPoint    =true;
+    CppClass   ="EntRobotSpawnerT";
+    description="RobotSpawner";
+    size       ={ { -8, -8, -8 }, { 8, 8, 8 } };
+})
+
 
 EntityClassDefs["Smoke"]=newEntClassDef(Common, Angles,
 {
