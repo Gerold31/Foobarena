@@ -32,7 +32,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "SoundSystem/SoundSys.hpp"
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
-
+#include "PhysicsWorld.hpp"
 #include "File.hpp"
 
 #include "RobotPart.hpp"
@@ -307,7 +307,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
     if(mPart.at(0)->State.Health > 0)
     {
-        if(movementCount / mMovementCount > 0.5)
+        if(movementCount / (double)mMovementCount > 0.5)
         {
             Vector3dT oldPos = State.Origin;
 
@@ -384,11 +384,11 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                 mTimeSinceLastShot += FrameTime;
                 if(mTimeSinceLastShot >= 1.0/mFirerate)
                 {
-                    bool shoot = false;
+                    bool shoot = true;
                     /// @todo AI: shoot
 
                     //debug
-                    shoot = rand()%10==0;
+                    //shoot = rand()%10==0;
 
                     for(int i=0; i<mPart.size(); i++)
                     {
@@ -430,7 +430,22 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                     mSound->Play();
                                 }
 
-                                /// @todo actual shot
+                                const unsigned short Pitch   = mPart.at(i)->State.Pitch  +(rand() % 200)-100;
+                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 200)-100;
+
+                                const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
+                                const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
+
+                                VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+                                ViewDir *= mRange;
+
+
+                                RayResultT RayResult(NULL);
+                                PhysicsWorld->TraceRay(pos, ViewDir/1000.0, RayResult);
+
+                                if (RayResult.GetHitEntity()!=NULL)
+                                    RayResult.GetHitEntity()->TakeDamage(mPart.at(i), mDamage, ViewDir);
+
 
                             }else
                             {
