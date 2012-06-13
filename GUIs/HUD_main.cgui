@@ -1,4 +1,4 @@
-dofile("Games/DeathMatch/GUIs/HUD_init.cgui");
+dofile("Games/Foobarena/GUIs/HUD_init.cgui");
 
 
 InfoFrags.NumFrags=0;
