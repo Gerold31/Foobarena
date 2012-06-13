@@ -105,14 +105,22 @@ void cf::GameSys::GameImplT::Initialize(bool AsClient, bool AsServer, ModelManag
         // but also to effectively load and initialize the models only at that later time, what might be very expensive, too!
         {
             // And the rest. Observe that static detail models are NOT mentioned (how could they?).
-            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_head_2.cmdl");
             ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_torso_1.cmdl");
-            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_movement_wheel_1.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_torso_2.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_torso_3.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_head_1.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_head_2.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_weapon_1.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_weapon_2.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_movement_1.cmdl");
+            ModelMan.GetModel("Games/Foobarena/Models/Robot/robot_movement_2.cmdl");
         }
 
 
         // Precache all sounds known to be used here.
-  //      m_PreCacheSounds.PushBack(SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader("Item/PickUp")));
+        m_PreCacheSounds.PushBack(SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader("Weapon/9mm_Shot")));
+        m_PreCacheSounds.PushBack(SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader("Weapon/Shotgun_Shot")));
+        m_PreCacheSounds.PushBack(SoundSystem->CreateSound3D(SoundShaderManager->GetSoundShader("Weapon/GLauncher_Shot")));
 
     }
 
