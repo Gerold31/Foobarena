@@ -31,6 +31,8 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "PhysicsWorld.hpp"
 #include "Libs/LookupTables.hpp"
 #include "Libs/Physics.hpp"
+#include "ConsoleCommands/Console.hpp"
+#include "Weapon.hpp"
 
 #include "SoundSystem/SoundSys.hpp"
 #include "../../GameWorld.hpp"
@@ -56,6 +58,10 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _WIN32
 #define _stricmp strcasecmp
 #endif
+
+#include "TelaString.hpp"
+#define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
+#define PRINT_CHAR(x) Console->DevPrint((TelaString(#x) + " :" + (int)x + "\n").toString())
 
 
 // Constants for State.StateOfExistance.
@@ -104,7 +110,7 @@ EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
                                100,     // Health
                                0,       // Armor
                                0,       // HaveItems
-                               0,       // HaveWeapons
+                               1,       // HaveWeapons
                                0,       // ActiveWeaponSlot
                                0,       // ActiveWeaponSequNr
                                0.0)),   // ActiveWeaponFrameNr
@@ -405,24 +411,23 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                 // Handle the state machine of the "_v" (view) model of the current weapon.
                 if (State.HaveWeapons & (1 << State.ActiveWeaponSlot))
                 {
-                    /*
-                    const CarriedWeaponT* CarriedWeapon=cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot);
+                    const WeaponT* weapon = cf::GameSys::GameImplT::GetInstance().getWeapon();
 
                     // Advance the frame time of the weapon.
-                    const CafuModelT* WeaponModel=CarriedWeapon->GetViewWeaponModel();
+                    const CafuModelT* weaponModel = weapon->getWeaponModel();
 
-                    IntrusivePtrT<AnimExprStandardT> StdAE=WeaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr);
+                    IntrusivePtrT<AnimExprStandardT> StdAE = weaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr);
 
                     StdAE->SetForceLoop(true);
                     StdAE->AdvanceTime(PlayerCommands[PCNr].FrameTime);
 
                     const float NewFrameNr=StdAE->GetFrameNr();
-                    const bool  AnimSequenceWrap=NewFrameNr < State.ActiveWeaponFrameNr || NewFrameNr > WeaponModel->GetAnims()[State.ActiveWeaponSequNr].Frames.Size()-1;
+                    const bool  AnimSequenceWrap=NewFrameNr < State.ActiveWeaponFrameNr || NewFrameNr > weaponModel->GetAnims()[State.ActiveWeaponSequNr].Frames.Size()-1;
 
                     State.ActiveWeaponFrameNr=NewFrameNr;
 
-                    CarriedWeapon->ServerSide_Think(this, PlayerCommands[PCNr], ThinkingOnServerSide, ServerFrameNr, AnimSequenceWrap);
-                    */
+                    weapon->ServerSide_Think(this, PlayerCommands[PCNr], ThinkingOnServerSide, ServerFrameNr, AnimSequenceWrap);
+
                 }
 
 
@@ -810,9 +815,9 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
                 State.Health             =100;
                 State.Armor              =0;
                 State.HaveItems          =0;
-                State.HaveWeapons        =0;
+                State.HaveWeapons        =1;
                 State.ActiveWeaponSlot   =0;
-                State.ActiveWeaponSequNr =0;
+                State.ActiveWeaponSequNr =5;
                 State.ActiveWeaponFrameNr=0.0;
 
                 ClipModel.SetOrigin(State.Origin);
@@ -820,6 +825,8 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 for (char Nr=0; Nr<15; Nr++) State.HaveAmmo         [Nr]=0;   // IMPORTANT: Do not clear the frags value in 'HaveAmmo[AMMO_SLOT_FRAGS]'!
                 for (char Nr=0; Nr<32; Nr++) State.HaveAmmoInWeapons[Nr]=0;
+                State.HaveAmmo[0] = 60;
+                State.HaveAmmoInWeapons[0] = 6;
                 break;
             }
 
@@ -836,10 +843,10 @@ void EntHumanPlayerT::ProcessEvent(char EventID)
 {
     // GameWorld->PrintDebug("Entity %3u: ProcessEvent(%u)", TypeID, EventID);
 
- //   switch (EventID)
+    switch (EventID)
     {
-    //    case EventID_PrimaryFire  : cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandlePrimaryFireEvent  (this, LastSeenAmbientColor); break;
-    //    case EventID_SecondaryFire: cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandleSecondaryFireEvent(this, LastSeenAmbientColor); break;
+        case EventID_PrimaryFire  : cf::GameSys::GameImplT::GetInstance().getWeapon()->ClientSide_HandleFireEvent  (this, LastSeenAmbientColor); break;
+//        case EventID_SecondaryFire: cf::GameSys::GameImplT::GetInstance().GetCarriedWeapon(State.ActiveWeaponSlot)->ClientSide_HandleSecondaryFireEvent(this, LastSeenAmbientColor); break;
     }
 }
 
@@ -914,6 +921,11 @@ void EntHumanPlayerT::Draw(bool FirstPersonView, float LodDist) const
 
             MatSys::Renderer->SetCurrentLightSourcePosition(LgtPos.x, LgtPos.y, LgtPos.z);
             MatSys::Renderer->SetCurrentEyePosition(EyePos.x, EyePos.y, EyePos.z);
+			
+            const CafuModelT* WeaponModel=cf::GameSys::GameImplT::GetInstance().getWeapon()->getWeaponModel();
+            AnimPoseT*        Pose       =WeaponModel->GetSharedPose(WeaponModel->GetAnimExprPool().GetStandard(State.ActiveWeaponSequNr, State.ActiveWeaponFrameNr));
+
+            Pose->Draw(-1 /*default skin*/, LodDist);
         }
     }
 }

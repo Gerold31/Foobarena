@@ -1,0 +1,13 @@
+Models/Weapons/DesertEagle/DesertEagle_p/w_44t
+{
+    diffusemap DesertEagle_w_w_44t_diff.png
+
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+
+    meta_editorImage noEditor
+}
+
+
+dofile("DesertEagle_p_editor.cmat")
