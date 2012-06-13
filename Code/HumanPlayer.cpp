@@ -50,10 +50,18 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "OpenGL/OpenGLWindow.hpp"
 #include "ParticleEngine/ParticleEngineMS.hpp"
 #include "TypeSys.hpp"
+#include "ScriptState.hpp"
 
 #include <cstdio>
 #include <string.h>
 #include <cmath>
+
+extern "C"
+{
+    #include <lua.h>
+    #include <lualib.h>
+    #include <lauxlib.h>
+}
 
 #ifndef _WIN32
 #define _stricmp strcasecmp
@@ -77,6 +85,15 @@ const char Flags_OldWishJump=1;
 const char EntHumanPlayerT::EventID_PrimaryFire  =0;
 const char EntHumanPlayerT::EventID_SecondaryFire=1;
 
+const luaL_Reg MethodsList[]=
+{
+    { "printHUD",EntHumanPlayerT::print },
+    { "giveAmmo",EntHumanPlayerT::giveAmmo},
+    { "getAmmo", EntHumanPlayerT::getAmmo},
+ // { "__tostring", toString },
+    { NULL, NULL }
+};
+
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntHumanPlayerT::GetType() const
@@ -90,7 +107,7 @@ void* EntHumanPlayerT::CreateInstance(const cf::TypeSys::CreateParamsT& Params)
     return new EntHumanPlayerT(*static_cast<const EntityCreateParamsT*>(&Params));
 }
 
-const cf::TypeSys::TypeInfoT EntHumanPlayerT::TypeInfo(GetBaseEntTIM(), "EntHumanPlayerT", "BaseEntityT", EntHumanPlayerT::CreateInstance, NULL /*MethodsList*/);
+const cf::TypeSys::TypeInfoT EntHumanPlayerT::TypeInfo(GetBaseEntTIM(), "EntHumanPlayerT", "BaseEntityT", EntHumanPlayerT::CreateInstance, MethodsList);
 
 
 EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
@@ -959,6 +976,11 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
                     break;
             }
 
+            if(mHUDText != "")
+            {
+                HUD_Font1.Print(50, 50, 800.0f, 600.0f, 0x00FF0000, mHUDText.c_str());
+            }
+
             // const int CharWidth=10;
 
             // HUD_Font1.Print(10+ 0*CharWidth, SingleOpenGLWindow->GetHeight()-16, 0x00FFFFFF, "Health %3u", State.Health);
@@ -1022,4 +1044,32 @@ void EntHumanPlayerT::setWorldTransform(const btTransform& /*worldTrans*/)
 {
     // Never called for a kinematic rigid body.
     assert(false);
+}
+
+int EntHumanPlayerT::print(lua_State *l)
+{
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+    size_t i;
+    const char *str = luaL_checklstring(l, 2, &i);
+
+    Ent->mHUDText = str;
+    return 0;
+}
+
+int EntHumanPlayerT::giveAmmo(lua_State *l)
+{
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+    Ent->State.HaveAmmo[Ent->State.ActiveWeaponSlot]+=luaL_checkinteger(l, 2);
+    return 0;
+}
+
+int EntHumanPlayerT::getAmmo(lua_State *l)
+{
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+
+    lua_pushinteger(l, Ent->State.HaveAmmo[Ent->State.ActiveWeaponSlot]);
+    return 1;
 }

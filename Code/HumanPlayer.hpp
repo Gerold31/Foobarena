@@ -25,12 +25,14 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "BaseEntity.hpp"
 #include "../../PlayerCommand.hpp"
 #include "btBulletDynamicsCommon.h"
+#include "Network/State.hpp"
 
+#include <string>
+using namespace std;
 
 class EntityCreateParamsT;
 class EntStaticDetailModelT;
 namespace cf { namespace GuiSys { class GuiI; } }
-
 
 class EntHumanPlayerT : public BaseEntityT, public btMotionState
 {
@@ -59,11 +61,17 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     void getWorldTransform(btTransform& worldTrans) const;
     void setWorldTransform(const btTransform& worldTrans);
 
+    void Serialize(cf::Network::OutStreamT &Stream) const {BaseEntityT::Serialize(Stream); Stream << mHUDText;}
+    void Deserialize(cf::Network::InStreamT &Stream, bool IsIniting) {BaseEntityT::Deserialize(Stream, IsIniting); Stream >> mHUDText;}
+
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
     static const cf::TypeSys::TypeInfoT TypeInfo;
 
+    static int print(lua_State *l);
+    static int giveAmmo(lua_State *l);
+    static int getAmmo(lua_State *l);
 
     private:
 
@@ -79,6 +87,8 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     mutable VectorT   LastSeenAmbientColor;     // This is a client-side variable, unrelated to prediction, and thus allowed.
     float             TimeForLightSource;
     cf::GuiSys::GuiI* GuiHUD;                   ///< The HUD GUI for this local human player entity.
+
+    string mHUDText;
 };
 
 #endif
