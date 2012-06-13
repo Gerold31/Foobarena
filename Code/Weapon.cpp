@@ -11,6 +11,10 @@
 #include "SoundSystem/SoundSys.hpp"
 #include "SoundSystem/SoundShaderManager.hpp"
 #include "SoundSystem/Sound.hpp"
+#include "ClipSys/ClipWorld.hpp"
+#include "ClipSys/ClipModel.hpp"
+#include "ClipSys/TraceResult.hpp"
+#include "MaterialSystem/Material.hpp"
 
 #include "Smoke.hpp"
 
@@ -200,34 +204,42 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
 	const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
 	const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
 	
-	const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+    VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+    ViewDir *= 100000;
 	
-	RayResultT RayResult(Player->GetRigidBody());
-	Player->PhysicsWorld->TraceRay(State.Origin/1000.0, scale(ViewDir, 9999999.0/1000.0), RayResult);
-	
-	if(RayResult.hasHit())
-	{
-		// Register a new particle at the 'Hit' point.
-		ParticleMST NewParticle;
-		
-		NewParticle.Origin[0] = RayResult.m_hitPointWorld.x()*1000.0f;
-		NewParticle.Origin[1] = RayResult.m_hitPointWorld.y()*1000.0f;
-		NewParticle.Origin[2] = RayResult.m_hitPointWorld.z()*1000.0f;
-		
-		NewParticle.Velocity[0] = 0;
-		NewParticle.Velocity[1] = 0;
-		NewParticle.Velocity[2] = 0;
-		
-		NewParticle.Age = 0.0;
-		NewParticle.Color[3] = 0;
-		
-		NewParticle.Radius = 300.0;
-		NewParticle.StretchY = 1.0;
-		NewParticle.RenderMat = ResMan.RenderMats[ResMan.PARTICLE_GENERIC1];
-		NewParticle.MoveFunction = RayResult.GetHitEntity() == NULL ? WeaponT::ParticleFunction_ShotHitWall : WeaponT::ParticleFunction_HitEntity;
-		
-		ParticleEngineMS::RegisterNewParticle(NewParticle);
-	}
+    cf::ClipSys::TraceResultT RayResult;
+    cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(Player->GameWorld->GetClipWorld());
+
+
+
+    Player->GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Players, &Player->ClipModel, RayResult, &hitClipModel);
+
+    if(hitClipModel)
+    {
+        Console->DevPrint("hit sth.\n");
+        // Register a new particle at the 'Hit' point.
+
+        VectorT hitPos = hitClipModel->GetOrigin() + ViewDir*RayResult.Fraction;
+        ParticleMST NewParticle;
+
+        NewParticle.Origin[0] = hitPos.x;
+        NewParticle.Origin[1] = hitPos.y;
+        NewParticle.Origin[2] = hitPos.z;
+
+        NewParticle.Velocity[0] = 0;
+        NewParticle.Velocity[1] = 0;
+        NewParticle.Velocity[2] = 0;
+
+        NewParticle.Age = 0.0;
+        NewParticle.Color[3] = 0;
+
+        NewParticle.Radius = 300.0;
+        NewParticle.StretchY = 1.0;
+        NewParticle.RenderMat = ResMan.RenderMats[ResMan.PARTICLE_GENERIC1];
+        NewParticle.MoveFunction = WeaponT::ParticleFunction_HitEntity;
+
+        ParticleEngineMS::RegisterNewParticle(NewParticle);
+    }
 	
 /*	// Register a new particle as "muzzle flash".
 	ParticleMST NewParticle;
