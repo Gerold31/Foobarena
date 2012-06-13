@@ -34,6 +34,10 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "SoundSystem/Sound.hpp"
 #include "PhysicsWorld.hpp"
 #include "File.hpp"
+#include "ClipSys/ClipModel.hpp"
+#include "ClipSys/ClipWorld.hpp"
+#include "ClipSys/TraceResult.hpp"
+#include "MaterialSystem/Material.hpp"
 
 #include "RobotPart.hpp"
 #include "Smoke.hpp"
@@ -437,21 +441,26 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                 }
 
                                 const unsigned short Pitch   = mPart.at(i)->State.Pitch  +(rand() % 200)-100;
-                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 200)-100;
+                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 200)-100 + 90*8192.0/45.0;
 
                                 const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
                                 const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
 
                                 VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
-                                ViewDir *= mRange;
+                                ViewDir *= mRange *1000;
 
+                                cf::ClipSys::TraceResultT RayResult;
+                                cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
 
-                                RayResultT RayResult(NULL);
-                                PhysicsWorld->TraceRay(pos, ViewDir/1000.0, RayResult);
+                                                                                                                      // robots can also hit themselves
+                                GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles | MaterialT::Clip_Players, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
 
-                                if (RayResult.GetHitEntity()!=NULL)
-                                    RayResult.GetHitEntity()->TakeDamage(mPart.at(i), mDamage, ViewDir);
-
+                                if(hitClipModel)
+                                {
+                                    BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
+                                    if(ent)
+                                        ent->TakeDamage((BaseEntityT *)mPart.at(i), mDamage, ViewDir);
+                                }
 
                             }else
                             {
