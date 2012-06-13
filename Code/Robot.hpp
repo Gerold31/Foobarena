@@ -53,6 +53,7 @@ class EntRobotT : public BaseEntityT
 
 
 private:
+    bool mCreated;
     vector<EntRobotPartT *> mPart;
     vector<Vector3dT> mSlotPos;
     vector<Vector3dT> mSlotRot;
@@ -60,10 +61,17 @@ private:
     int mSpeed, mRange, mDamage;
     double mFirerate, mTimeSinceLastShot;
     int mMovementRadius;
-    bool mCreated;
-    SoundI* mSound;
+    int mFovy;
+
+    Vector3dT mLastPlayerPos;
+    double mLastPlayerTime;
+    double mLastRandomTurnDirChange;
+    bool mRandomTurnDir;
+    bool mIsShooting;
+    bool mMove;
 
     EntSmokeT *mSmoke;
+    SoundI* mSound;
 };
 
 #endif

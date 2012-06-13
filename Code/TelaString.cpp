@@ -17,6 +17,8 @@ along with TelaMitto.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "TelaString.hpp"
 
+#include <stdio.h>
+
 typedef unsigned int uint;
 
 /////////////////
@@ -127,50 +129,11 @@ TelaString &TelaString::operator=(size_t input)
 TelaString &TelaString::operator=(double input)
 {
 	content.clear();
-	bool negative = false;
-	bool all0 = true;
-    long n = (long)(input * 100000);
-	if(n == 0)
-	{
-		content.push_back(48);
-	}
-	else
-	{
-		int i = 0;
-		if(n < 0)
-		{
-			n *= -1;
-			negative = true;
-		}
-		while(n > 0)
-		{
-			if(i == 5 && !all0)
-				content.push_front('.');
-			if(i < 5 && all0 && n % 10 == 0)
-			{
-			}
-			else if(i < 5 && n % 10 != 0)
-			{
-				all0 = false;
-				content.push_front(n % 10 + 48);
-			}
-			else
-			{
-				content.push_front(n % 10 + 48);
-			}
-			n /= 10;
-			i++;
-		}
-		while(i <= 5)
-		{
-			if(i == 5)
-				content.push_front('.');
-			content.push_front('0');
-			i++;
-		}
-		if(negative)
-			content.push_front(45);
-	}
+
+    char str[64];
+    sprintf(str, "%f", input);
+    this->operator =(str);
+
 	return *this;
 }
 
