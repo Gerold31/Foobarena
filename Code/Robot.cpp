@@ -185,6 +185,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         }
 
         propsTorso["classname"]     ="RobotPart";
+        propsTorso["name"]          =TelaString("Torso") + Name;
         propsTorso["model"]         ="Models/Robot/robot_torso_" + torsoID + ".cmdl";
         propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmap";
 
@@ -211,6 +212,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         propsHead["collisionModel"] ="Models/Robot/robot_head_" + headID + ".cmap";
         for(int i=0; i<mHeadCount; i++)
         {
+            propsHead["name"] = TelaString("Head") + i + Name;
             id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = headHealth;
@@ -244,6 +246,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmap";
         for(int i=0; i<mWeaponCount; i++)
         {
+            propsWeapon["name"] = TelaString("Weapon") + i + Name;
             id = GameWorld->CreateNewEntity(propsWeapon, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = weaponHealth;
@@ -273,6 +276,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
         for(int i=0; i<mMovementCount; i++)
         {
+            propsMovement["name"] = TelaString("Movement") + i + Name;
             id = GameWorld->CreateNewEntity(propsMovement, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = movementHealth;
@@ -323,9 +327,11 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             {
          //       Console->DevPrint("in Spawn\n");
                 // get out of the spawn
+                State.Heading = angle+180;
+                /*
                 if((angle > 355 || angle < 5) || (angle > 85 && angle < 95) || (angle > 175 && angle < 185) || (angle > 265 && angle < 275))
                 {
-                    State.Heading = angle+180;
+
                 }else if(angle >= 5 && angle <= 85)
                 {
                     if(angle < 45)
@@ -354,15 +360,15 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                     else
                         State.Heading = angle+180 - 90;
                 }
-                State.Heading *= 8192.0/45.0;
+                */
             }else
             {
        //         Console->DevPrint("in Arena");
                 // debug
                 // drive clockwise cicles
-                State.Heading = angle+100;
-                State.Heading *= 8192.0/45.0;
+                State.Heading = angle+95;
             }
+            State.Heading *= 8192.0/45.0;
             State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
 
             State.Velocity = State.Origin - oldPos;
@@ -493,29 +499,13 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     }
 }
 
-
-void EntRobotT::Draw(bool /*FirstPersonView*/, float LodDist) const
-{
-}
-
-
-void EntRobotT::PostDraw(float FrameTime, bool /*FirstPersonView*/)
-{
-}
-
-
-void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
-{
-}
-
-
 void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part)
 {
     if(isTorso)
     {
-        // 80% damage to torso, rest to the other parts
-        part->State.Health -= 0.8* Amount;
-        int damage = 0.2 * Amount/ mPart.size();
+        // 60% damage to torso, rest to the other parts
+        part->State.Health -= 0.6* Amount;
+        int damage = 0.4 * Amount/ mPart.size();
         for(int i=1; i<mPart.size(); i++)
         {
             if(!mPart.at(i)) continue;
@@ -526,9 +516,9 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
         }
     }else
     {
-        // 80% damage to part, rest to torso
-        part->State.Health -= 0.8*Amount;
-        mPart.at(0)->State.Health -= 0.2*Amount;
+        // 60% damage to part, rest to torso
+        part->State.Health -= 0.6*Amount;
+        mPart.at(0)->State.Health -= 0.4*Amount;
         if(part->State.Health <= 0)
         {
             /// @todo add some smoke effects

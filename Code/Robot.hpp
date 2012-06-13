@@ -41,11 +41,11 @@ class EntRobotT : public BaseEntityT
     ~EntRobotT();
 
     void Think(float FrameTime, unsigned long ServerFrameNr);
-    void Draw(bool FirstPersonView, float LodDist) const;
-    void PostDraw(float FrameTime, bool FirstPersonView);
-    void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir);
 
     void TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part);
+
+    void Serialize(cf::Network::OutStreamT &Stream) const {}
+    void Deserialize(cf::Network::InStreamT &Stream, bool IsIniting) {}
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);
