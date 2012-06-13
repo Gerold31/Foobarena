@@ -154,25 +154,29 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
 
                 if (ThinkingOnServerSide)
                 {
-                    // If we are on the server-side, find out what or who we hit.
-                    const float ViewDirZ=-LookupTables::Angle16ToSin[state.Pitch];
-                    const float ViewDirY= LookupTables::Angle16ToCos[state.Pitch];
+                    const EntityStateT& State = Player->State;
 
-                    const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[state.Heading], ViewDirY*LookupTables::Angle16ToCos[state.Heading], ViewDirZ);
+                    const unsigned short Pitch   = State.Pitch  +(rand() % 200)-100;
+                    const unsigned short Heading = State.Heading+(rand() % 200)-100;
 
-                    RayResultT RayResult(Player->GetRigidBody());
-                    Player->PhysicsWorld->TraceRay(state.Origin/1000.0, scale(ViewDir, 9999999.0/1000.0), RayResult);
+                    const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
+                    const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
 
-                    // debug
-                    if(RayResult.hasHit())
-                        Console->DevPrint("hit ");
-                    if(RayResult.GetHitEntity())
-                        Console->Print("an entity!\n");
-                    else
-                        Console->Print("NULL\n");
+                    VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+                    ViewDir *= 100000;
 
-                    if (RayResult.hasHit() && RayResult.GetHitEntity()!=NULL)
-                        RayResult.GetHitEntity()->TakeDamage(Player, 7, ViewDir);
+                    cf::ClipSys::TraceResultT RayResult;
+                    cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(Player->GameWorld->GetClipWorld());
+
+
+                    Player->GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Players, &Player->ClipModel, RayResult, &hitClipModel);
+
+                    if(hitClipModel)
+                    {
+                        BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
+                        if(ent)
+                            ent->TakeDamage((BaseEntityT *)Player, 50, ViewDir);
+                    }
                 }
                 break;
             }
@@ -239,6 +243,8 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
         NewParticle.MoveFunction = WeaponT::ParticleFunction_HitEntity;
 
         ParticleEngineMS::RegisterNewParticle(NewParticle);
+
+        BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
     }
 	
 /*	// Register a new particle as "muzzle flash".

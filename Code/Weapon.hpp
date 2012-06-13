@@ -37,7 +37,7 @@ private:
 	
 	static bool ParticleFunction_ShotHitWall(ParticleMST *particle, float time);
 	static bool ParticleFunction_HitEntity(ParticleMST *particle, float time);
-	static bool ParticleFunction_ShotWhiteSmoke(ParticleMST *particle, float time);
+    static bool ParticleFunction_ShotWhiteSmoke(ParticleMST *particle, float time);
 };
 
 

@@ -119,7 +119,7 @@ EntRobotPartT::~EntRobotPartT()
 
 void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 {
-    if(mType == RobotPartTorso)
+//    if(mType == RobotPartTorso)
     {
         ClipModel.SetOrigin(State.Origin);
         // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!

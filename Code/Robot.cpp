@@ -392,7 +392,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
                     for(int i=0; i<mPart.size(); i++)
                     {
-                        if(mPart.at(i));
+                        if(!mPart.at(i)) continue;
                         if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
                         {
                             if(shoot)
@@ -496,7 +496,6 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
 
 void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir, bool isTorso, EntRobotPartT *part)
 {
-    Console->DevPrint("EntRobotT::TakeDamage");
     if(isTorso)
     {
         // 80% damage to torso, rest to the other parts
@@ -504,6 +503,7 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
         int damage = 0.2 * Amount/ mPart.size();
         for(int i=1; i<mPart.size(); i++)
         {
+            if(!mPart.at(i)) continue;
             mPart.at(i)->State.Health -= damage;
             // do not destroy part
             if(mPart.at(i)->State.Health < 1)
@@ -521,6 +521,7 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
             // find part;
             for(int i=1; i<mPart.size(); i++)
             {
+                if(!mPart.at(i)) continue;
                 if(mPart.at(i) == part)
                 {
                     GameWorld->RemoveEntity(mPart.at(i)->ID);
