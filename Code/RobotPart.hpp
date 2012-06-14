@@ -55,6 +55,7 @@ public:
 
     void Serialize(cf::Network::OutStreamT& Stream) const;
     void Deserialize(cf::Network::InStreamT& Stream, bool IsIniting=false);
+    void Cl_UnserializeFrom();
 
     const cf::TypeSys::TypeInfoT* GetType() const;
     static void* CreateInstance(const cf::TypeSys::CreateParamsT& Params);

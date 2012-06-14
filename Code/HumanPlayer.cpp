@@ -187,6 +187,10 @@ EntHumanPlayerT::~EntHumanPlayerT()
 
 void EntHumanPlayerT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
+    Console->DevPrint("EntHumanPlayerT::TakeDamage\n");
+    State.Health -= Amount;
+    if(State.Health < 0)
+        State.StateOfExistance = StateOfExistance_Dead;
 }
 
 

@@ -243,8 +243,6 @@ void WeaponT::ClientSide_HandleFireEvent(const EntHumanPlayerT* Player, const Ve
         NewParticle.MoveFunction = WeaponT::ParticleFunction_HitEntity;
 
         ParticleEngineMS::RegisterNewParticle(NewParticle);
-
-        BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
     }
 	
 /*	// Register a new particle as "muzzle flash".

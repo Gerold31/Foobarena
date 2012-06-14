@@ -147,7 +147,7 @@ TelaString File::getStr(TelaString tag, bool removeSpaces)
 			return str2;
 		}
 	}
-	mLastError = ERROR_TAG_NOT_FOUND;
+    mLastError = ERROR_TAG_NOT_FOUND_;
 	mFile.clear();
 	return "";
 }
@@ -201,7 +201,7 @@ TelaString File::getStr(TelaString tag, TelaString start, bool removeSpaces)
 			return str2;
 		}
 	}
-	mLastError = ERROR_TAG_NOT_FOUND;
+    mLastError = ERROR_TAG_NOT_FOUND_;
 	mFile.clear();
 	return "";
 }

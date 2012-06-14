@@ -35,6 +35,11 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "ClipSys/CollisionModelMan.hpp"
 #include "TelaString.hpp"
 #include "Robot.hpp"
+#include "Math3D/Matrix3x3.hpp"
+#include "Math3D/Angles.hpp"
+
+
+#define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotPartT::GetType() const
@@ -122,10 +127,13 @@ void EntRobotPartT::Think(float FrameTime, unsigned long /*ServerFrameNr*/)
 //    if(mType == RobotPartTorso)
     {
         ClipModel.SetOrigin(State.Origin);
+        /*
         // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!
         ClipModel.SetOrientation(cf::math::Matrix3x3T<double>::GetRotateZMatrix(90.0-double(State.Heading)/8192.0*45.0)
                                * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
                                * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
+        */
+        ClipModel.SetOrientation(cf::math::Matrix3x3dT(cf::math::AnglesdT(-double(State.Pitch  )/8192.0*45.0, double(State.Bank   )/8192.0*45.0, 90.0-double(State.Heading)/8192.0*45.0)));
         ClipModel.Register();
     }
 }
@@ -197,19 +205,35 @@ void EntRobotPartT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& 
 
 void EntRobotPartT::Serialize(cf::Network::OutStreamT& Stream) const
 {
-    BaseEntityT::Serialize(Stream);
+    Stream << float(State.Origin.x);
+    Stream << float(State.Origin.y);
+    Stream << float(State.Origin.z);
+    Stream << State.Heading;
+    Stream << State.Pitch;
+    Stream << State.Bank;
+    Stream << State.ModelIndex;
+    Stream << State.ModelSequNr;
+    Stream << State.ModelFrameNr;
+
     Stream << mModelName;
     Stream << mCollisionModelName;
-    Stream << (uint32_t)mType;
 }
 
 void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
 {
-    uint32_t i;
-    BaseEntityT::Deserialize(Stream, IsIniting);
+    float f;
+    Stream >> f;State.Origin.x = f;
+    Stream >> f;State.Origin.y = f;
+    Stream >> f;State.Origin.z = f;
+    Stream >> State.Heading;
+    Stream >> State.Pitch;
+    Stream >> State.Bank;
+    Stream >> State.ModelIndex;
+    Stream >> State.ModelSequNr;
+    Stream >> State.ModelFrameNr;
+
     Stream >> mModelName;
     Stream >> mCollisionModelName;
-    Stream >> i;mType = i;
     if(!mModel)
     {
 //        Console->DevPrint("Deserialize: model = " + mModelName + "\n");
@@ -228,13 +252,20 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
             ClipModel.SetCollisionModel(CollisionModel);
             ClipModel.SetUserData(this);
         }
-        ClipModel.SetOrigin(State.Origin);
-        // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!
-        ClipModel.SetOrientation(cf::math::Matrix3x3T<double>::GetRotateZMatrix(90.0-double(State.Heading)/8192.0*45.0)
-                               * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
-                               * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
-        ClipModel.Register();
     }
+}
+
+void EntRobotPartT::Cl_UnserializeFrom()
+{
+    ClipModel.SetOrigin(State.Origin);
+    // TODO: Optimize! This matrix computation takes many unnecessary muls and adds...!
+    /*
+    ClipModel.SetOrientation(cf::math::Matrix3x3T<double>::GetRotateZMatrix(90.0-double(State.Heading)/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateYMatrix(     double(State.Bank   )/8192.0*45.0)
+                           * cf::math::Matrix3x3T<double>::GetRotateXMatrix(    -double(State.Pitch  )/8192.0*45.0));
+    */
+    ClipModel.SetOrientation(cf::math::Matrix3x3dT(cf::math::AnglesdT(-double(State.Pitch  )/8192.0*45.0, double(State.Bank   )/8192.0*45.0, 90.0-double(State.Heading)/8192.0*45.0)));
+    ClipModel.Register();
 }
 
 bool EntRobotPartT::playAnimation(string name)
