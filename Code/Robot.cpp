@@ -50,7 +50,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 
 #define LENGTH(a) (sqrt((a).x*(a).x + (a).y*(a).y))
 
-#define ROT_SPEED (mSpeed * FrameTime)
+#define ROT_SPEED (mSpeed * FrameTime *3)
 
 // Implement the type info related code.
 const cf::TypeSys::TypeInfoT* EntRobotT::GetType() const
@@ -94,11 +94,18 @@ EntRobotT::EntRobotT(const EntityCreateParamsT& Params)
     State.Heading = 1<<14;
     mSmoke = NULL;
     mTimeSinceLastShot = 0;
-    mLastPlayerPos = Vector3dT(ARENASIZE,ARENASIZE,-500);
-    mLastPlayerTime = 0;
-    mLastRandomTurnDirChange = 0;
-    mRandomTurnDir = rand()%2;
     mIsShooting = false;
+
+    mTarget = NULL;
+    ArrayT<unsigned long> ids = GameWorld->GetAllEntityIDs();
+    for(int i=0; i<ids.Size(); i++)
+    {
+        if(GameWorld->GetBaseEntityByID(ids[i])->Name == "Player1")
+        {
+            mTarget = GameWorld->GetBaseEntityByID(ids[i]);
+            break;
+        }
+    }
 }
 
 EntRobotT::~EntRobotT()
@@ -306,13 +313,11 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
     //------------------------------Positioning----------------------------------
     int movementCount = 0, headCount = 0, weaponCount = 0;
 
-    mLastPlayerTime += FrameTime;
     mTimeSinceLastShot += FrameTime;
-    mLastRandomTurnDirChange += FrameTime;
 
     for(int i=0; i<mPart.size(); i++)
     {
-        if(!mPart.at(i)) return;
+        if(!mPart.at(i)) continue;
         if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartHead)
             headCount++;
         else if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
@@ -323,21 +328,39 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
     if(mPart.at(0)->State.Health > 0)
     {
+        Vector3dT dir = mTarget->State.Origin - State.Origin;
+
+        /*
+        dir = dir.GetRotZ(State.Heading*45.0/8192.0);
+        dir.y = -dir.y;
+        */
+
+        double playerAngle = atan2(dir.y, dir.x)* 180.0 / M_PI + State.Heading *45.0f/8192.0f;
+        while(playerAngle < -180) playerAngle += 360; while(playerAngle >=180)playerAngle -= 360;
+
         if(movementCount / (double)mMovementCount > 0.5)
         {
             Vector3dT oldPos = State.Origin;
+            bool inSpawn = false;
 
             if(LENGTH(State.Origin) > ARENASIZE)
             {
                 // get out of the spawn
-                double angle = atan2(-State.Origin.y, State.Origin.x)* 180.0 / M_PI; // should be atan2(y, x) but robot is moving sidewise
+                inSpawn = true;
+                double angle = atan2(-State.Origin.y, State.Origin.x)* 180.0 / M_PI;
 
-                while(angle < 0) angle += 360; while(angle >=360)angle -= 360;
+                angle += 180;
+                while(angle < -180) angle += 360; while(angle >= 180)angle -= 360;
 
-                State.Heading = (angle + 180) *8192.0/45.0;
+                /*
+                if(angle > State.Heading*45.0f/8192.0f)
+                    State.Heading -= ROT_SPEED;
+                else State.Heading += ROT_SPEED;
+                */
+                State.Heading = angle*8192/45.0;
             }
-            if(!mIsShooting && mMove)
-                State.Origin += Vector3dT(mSpeed * FrameTime,0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
+            if(!mIsShooting || inSpawn)
+                State.Origin += Vector3dT((mDirection || inSpawn)? (mSpeed * FrameTime) : -(mSpeed * FrameTime),0,0).GetRotZ(-State.Heading *45.0f/8192.0f);
 
             State.Velocity = State.Origin - oldPos;
         }else if(movementCount > 0)
@@ -348,7 +371,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                 if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartMovement)
                 {
                     GameWorld->RemoveEntity(mPart.at(i)->ID);
-                    delete mPart.at(i);
                     mPart[i] = NULL;
                 }
             }
@@ -357,213 +379,110 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
         if(headCount > 0)
         {
-            if(weaponCount > 0)
+            if(weaponCount > 0 && mTarget)
             {
-                // look for player
-                double fixedHeading = State.Heading*45.0/8192.0 + 180;
-                while(fixedHeading < -180) fixedHeading += 360; while(fixedHeading >=180)fixedHeading -= 360;
-
-                double playerAngle = atan2(mLastPlayerPos.y-State.Origin.y, mLastPlayerPos.y-State.Origin.x)* 180.0 / M_PI + fixedHeading +180;
-                while(playerAngle < -180) playerAngle += 360; while(playerAngle >=180)playerAngle -= 360;
-
-
-                for(int i=0; i<mPart.size(); i++)
-                {
-                    if(mLastPlayerTime == 0) break; // another head found the player
-                    if(!mPart.at(i)) continue;
-                    if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartHead)
-                    {
-                        unsigned short Pitch   = 0;//mPart.at(i)->State.Pitch;
-
-                        for(int j=0; j<5; j++)
-                        {
-                            unsigned short Heading = (fixedHeading)*8192.0/45.0;
-                            if(mLastPlayerPos.z < 0 || mLastPlayerTime > 1)
-                            {
-                                // we've never seen the player or lost him so trace a wide area
-                                Heading += (2*mFovy / 50 - mFovy) * 8192.0/45.0;
-                            }else
-                            {
-                                // else focus rays to lastPlayerPos
-                                double a = i*20/50.0 - 25*20/50.0 + playerAngle;
-                                if(a > 0) a = max(a, mFovy);
-                                else      a = min(a, -mFovy);
-                                Heading += a*8192.0/45.0;
-                            }
-
-
-                            const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
-                            const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
-
-                            VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
-                            ViewDir *= mRange *1000;
-
-                            cf::ClipSys::TraceResultT RayResult;
-                            cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
-
-                            GameWorld->GetClipWorld().TraceRay(mPart.at(i)->State.Origin+Vector3dT(0,0,100), ViewDir, MaterialT::Clip_Projectiles, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
-
-                            if(hitClipModel)
-                            {
-                                BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
-                                if(ent->Name == "Player1")
-                                {
-                                    // found him!
-                                    Console->DevPrint("I found you!\n");
-                                    PRINT_VAR(playerAngle);
-                                    PRINT_VAR(atan2(ViewDir.y, ViewDir.x));
-                                    PRINT_VAR(fixedHeading);
-                                    PRINT_VAR(State.Heading*45.0/8192.0);
-                                    PRINT_VAR(State.Origin.x);
-                                    PRINT_VAR(State.Origin.y);
-                                    PRINT_VAR(ent->State.Origin.x);
-                                    PRINT_VAR(ent->State.Origin.y);
-                                    mLastPlayerPos = ent->State.Origin;
-                                    mLastPlayerTime = 0;
-
-                                    std::map<std::string, std::string> props;
-                                    props["classname"] = "Smoke";
-                                    props["StartSize"] = "100";
-                                    props["EndSize"] = "100";
-                                    props["LifeTime"] = "2";
-                                    props["ParticleSpawnTime"] = "0.01";
-                                    props["Color"] = "127 127 127 255";
-                                    props["NumberOfParticles"] = "700";
-                                    props["ParticleVelocity"] = TelaString(ViewDir.x) + " " +  ViewDir.y + " " + ViewDir.z;
-
-                                    unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, State.Origin);
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // head to player
-                if(mLastPlayerPos.z < 0 || mLastPlayerTime > 1)
+                if(LENGTH(dir) < mRange/3*1000 && (playerAngle > -90 && playerAngle < 90))
                 {
-                    // we still don't know where the player is so turn randomly
-                    mMove = true;
-                    if(mLastRandomTurnDirChange > 5)
-                    {
-                        mRandomTurnDir = rand()%2;
-                        mLastRandomTurnDirChange = 0;
-                    }
+                    mDirection = false;
+                    if(playerAngle >= 0)
+                        State.Heading -= ROT_SPEED;
+                    else
+                        State.Heading += ROT_SPEED;
 
-                    if(LENGTH(State.Origin) > 0.7*ARENASIZE)
-                    {
-                        // head to center
-                        double angle = atan2(-State.Origin.y, State.Origin.x)* 180.0 / M_PI; // should be atan2(y, x) but robot is moving sidewise
-                        //angle -= 180;
-                        while(angle < -180) angle += 360; while(angle >=180)angle -= 360;
-                        if(angle > State.Heading *45.0/8192.0 + 90)
-                            State.Heading += ROT_SPEED;
-                        else
-                            State.Heading -= ROT_SPEED;
-
-                    }else
-                    {
-                        if(mRandomTurnDir)
-                            State.Heading += ROT_SPEED*0.8;
-                        else
-                            State.Heading -= ROT_SPEED*0.8;
-                    }
-                    mIsShooting = false;
                 }else
                 {
-                    mMove = false;
-                    // we know the PlayerPos, so aim
-                    if(playerAngle > ROT_SPEED*45.0/8192.0)
+                    mDirection = true;
+
+                    if(playerAngle >= 0)
                         State.Heading -= ROT_SPEED;
-                    else if(playerAngle >= 0)
-                        State.Heading -= playerAngle *8192.0/45.0;
-                    else if(playerAngle < -ROT_SPEED*45.0/8192.0)
-                        State.Heading += ROT_SPEED;
                     else
-                        State.Heading += playerAngle *8192.0/45.0;
+                        State.Heading += ROT_SPEED;
+                }
 
-                //    playerAngle = atan2(mLastPlayerPos.y-State.Origin.y, mLastPlayerPos.y-State.Origin.x)* 180.0 / M_PI - State.Heading*45.0/8192.0 - 90;
-                //    while(playerAngle < -180) playerAngle += 360; while(playerAngle >=180)playerAngle -= 360;
-                //    PRINT_VAR(playerAngle);
 
-                    if(playerAngle < 10 && playerAngle > -10)
+
+                if(playerAngle < 2 && playerAngle > -2 && LENGTH(dir) <= mRange*1000)
+                {
+                    // shoot
+                    mIsShooting = true;
+
+                    if(mTimeSinceLastShot >= 1.0/mFirerate)
                     {
-                        // shoot
-                        mIsShooting = true;
 
-                        if(mTimeSinceLastShot >= 1.0/mFirerate)
+                        for(int i=0; i<mPart.size(); i++)
                         {
-
-                            for(int i=0; i<mPart.size(); i++)
+                            if(!mPart.at(i)) continue;
+                            if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
                             {
-                                if(!mPart.at(i)) continue;
-                                if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
+                                mPart.at(i)->playAnimation("Shot");
+
+                                //Console->DevPrint((char *)(TelaString("Velocity: ") + mPart.at(i)->State.Velocity.x + " " + mPart.at(i)->State.Velocity.y + "  " + mPart.at(i)->State.Velocity.z + "\n"));
+                                Vector3dT pos = mPart.at(i)->State.Velocity;
+                                pos.z = 0;
+                                pos = mPart.at(i)->State.Origin + pos.GetRotY(mSlotRot.at(i).y).GetRotZ(90-mSlotRot.at(i).z-mPart.at(i)->State.Heading *45.0f/8192.0f)*25;
+                                pos.z += mPart.at(i)->State.Velocity.z*25;
+                                //Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
+
+                                //create smoking barrel effect
+                                std::map<std::string, std::string> props;
+                                props["classname"] = "Smoke";
+                                props["StartSize"] = TelaString(mDamage).c_str();
+                                props["EndSize"] = TelaString(10*mDamage).c_str();
+                                props["LifeTime"] = TelaString(0.1/mFirerate).c_str();
+                                props["ParticleSpawnTime"] = "0.01";
+                                props["Color"] = "127 127 127 255";
+                                props["NumberOfParticles"] = TelaString((0.1/mFirerate)/0.001).c_str();
+                                props["ParticleVelocity"] = "0 0 2000";
+
+                                unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, pos);
+                                EntSmokeT *smoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
+                                smoke->State.Origin = pos;
+
+                                //play sound
+                                if(mSound)
                                 {
+                                    mSound->SetPosition(pos);
+                                    mSound->SetDirection(pos - mPart.at(i)->State.Origin);
+                                    mSound->SetVelocity(State.Velocity);
+                                    mSound->Play();
+                                }
 
+                                const unsigned short Pitch   = mPart.at(i)->State.Pitch  ;//+(rand() % 2000)-1000;
+                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 500)-250 + 90*8192.0/45.0;
 
-                                    //Console->DevPrint((char *)(TelaString("Velocity: ") + mPart.at(i)->State.Velocity.x + " " + mPart.at(i)->State.Velocity.y + "  " + mPart.at(i)->State.Velocity.z + "\n"));
-                                    Vector3dT pos = mPart.at(i)->State.Velocity;
-                                    pos.z = 0;
-                                    pos = mPart.at(i)->State.Origin + pos.GetRotY(mSlotRot.at(i).y).GetRotZ(90-mSlotRot.at(i).z-mPart.at(i)->State.Heading *45.0f/8192.0f)*25;
-                                    pos.z += mPart.at(i)->State.Velocity.z*25;
-                                    //Console->DevPrint((char *)(TelaString("Shooting: FrameTime:") + FrameTime + " timeSinceLastShot: " + mTimeSinceLastShot + " NextShot: " + (double)1.0/mFirerate + " FireRate: " + mFirerate + "\n"));
-                                    mPart.at(i)->playAnimation("Shot");
+                                const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
+                                const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
 
-                                    //create smoking barrel effect
-                                    std::map<std::string, std::string> props;
-                                    props["classname"] = "Smoke";
-                                    props["StartSize"] = TelaString(mDamage).c_str();
-                                    props["EndSize"] = TelaString(10*mDamage).c_str();
-                                    props["LifeTime"] = TelaString(0.1/mFirerate).c_str();
-                                    props["ParticleSpawnTime"] = "0.01";
-                                    props["Color"] = "127 127 127 255";
-                                    props["NumberOfParticles"] = TelaString((0.1/mFirerate)/0.001).c_str();
-                                    props["ParticleVelocity"] = "0 0 2000";
+                                VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
+                                ViewDir *= mRange *1000;
 
-                                    unsigned long id = GameWorld->CreateNewEntity(props, ServerFrameNr, pos);
-                                    EntSmokeT *smoke = (EntSmokeT *)GameWorld->GetBaseEntityByID(id);
-                                    smoke->State.Origin = pos;
+                                cf::ClipSys::TraceResultT RayResult;
+                                cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
 
-                                    //play sound
-                                    if(mSound)
-                                    {
-                                        mSound->SetPosition(pos);
-                                        mSound->SetDirection(pos - mPart.at(i)->State.Origin);
-                                        mSound->SetVelocity(State.Velocity);
-                                        mSound->Play();
-                                    }
+                                GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
 
-                                    const unsigned short Pitch   = mPart.at(i)->State.Pitch  +(rand() % 200)-100;
-                                    const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 200)-100 + 90*8192.0/45.0;
-
-                                    const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
-                                    const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
-
-                                    VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
-                                    ViewDir *= mRange *1000;
-
-                                    cf::ClipSys::TraceResultT RayResult;
-                                    cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
-
-                                                                                                                          // robots can also hit themselves
-                                    GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles | MaterialT::Clip_Players, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
-
-                                    if(hitClipModel)
-                                    {
-                                        BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
-                                        if(ent)
-                                            ent->TakeDamage((BaseEntityT *)mPart.at(i), mDamage, ViewDir);
-                                    }
+                                if(hitClipModel)
+                                {
+                                    BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
+                                    if(ent)
+                                        ent->TakeDamage((BaseEntityT *)mPart.at(i), mDamage, ViewDir);
                                 }
                             }
-                            mTimeSinceLastShot = 0;
                         }
-                    }else
+                        mTimeSinceLastShot = 0;
+                    }
+                }else
+                {
+                    mIsShooting = false;
+                    for(int i=0; i<mPart.size(); i++)
                     {
-                        mIsShooting = false;
+                        if(!mPart.at(i)) continue;
+                        if(mPart.at(i)->getPartType() == EntRobotPartT::RobotPartWeapon)
+                            mPart.at(i)->playAnimation("");
                     }
                 }
+
             }
         }
 

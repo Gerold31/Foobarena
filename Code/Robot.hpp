@@ -63,12 +63,10 @@ private:
     int mMovementRadius;
     int mFovy;
 
-    Vector3dT mLastPlayerPos;
-    double mLastPlayerTime;
-    double mLastRandomTurnDirChange;
-    bool mRandomTurnDir;
     bool mIsShooting;
-    bool mMove;
+    bool mDirection;
+
+    BaseEntityT *mTarget;
 
     EntSmokeT *mSmoke;
     SoundI* mSound;
