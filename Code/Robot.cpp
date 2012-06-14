@@ -448,8 +448,8 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                     mSound->Play();
                                 }
 
-                                const unsigned short Pitch   = mPart.at(i)->State.Pitch  ;//+(rand() % 2000)-1000;
-                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 500)-250 + 90*8192.0/45.0;
+                                const unsigned short Pitch   = mPart.at(i)->State.Pitch  +(rand() % 200)-100;
+                                const unsigned short Heading = mPart.at(i)->State.Heading+(rand() % 2000)-1000 + 90*8192.0/45.0;
 
                                 const float ViewDirZ = -LookupTables::Angle16ToSin[Pitch];
                                 const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
@@ -460,7 +460,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                 cf::ClipSys::TraceResultT RayResult;
                                 cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
 
-                                GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
+                                GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles | MaterialT::Clip_Players, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
 
                                 if(hitClipModel)
                                 {
