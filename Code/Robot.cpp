@@ -460,7 +460,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                 cf::ClipSys::TraceResultT RayResult;
                                 cf::ClipSys::ClipModelT *hitClipModel = new cf::ClipSys::ClipModelT(GameWorld->GetClipWorld());
 
-                                GameWorld->GetClipWorld().TraceRay(State.Origin, ViewDir, MaterialT::Clip_Projectiles | MaterialT::Clip_Players, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
+                                GameWorld->GetClipWorld().TraceRay(pos, ViewDir, MaterialT::Clip_Projectiles | MaterialT::Clip_Players, &mPart.at(i)->ClipModel, RayResult, &hitClipModel);
 
                                 if(hitClipModel)
                                 {

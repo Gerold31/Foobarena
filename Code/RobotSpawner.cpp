@@ -169,10 +169,10 @@ int EntRobotSpawnerT::spawnRobot(lua_State *l)
 EntRobotSpawnerT::RobotInfoT::RobotInfoT(int torsoID, int headID, int weaponID, int movementID)
 {
     static int robots = 0;
-    mTorsoID    = torsoID    < 0 || torsoID    > MAX_TORSO    ? (rand()%MAX_TORSO)    +1 : torsoID;
-    mHeadID     = headID     < 0 || headID     > MAX_HEAD     ? (rand()%MAX_HEAD)     +1 : headID;
-    mWeaponID   = weaponID   < 0 || weaponID   > MAX_WEAPON   ? (rand()%MAX_WEAPON)   +1 : weaponID;
-    mMovementID = movementID < 0 || movementID > MAX_MOVEMENT ? (rand()%MAX_MOVEMENT) +1 : movementID;
+    mTorsoID    = torsoID    <= 0 || torsoID    > MAX_TORSO    ? (rand()%MAX_TORSO)    +1 : torsoID;
+    mHeadID     = headID     <= 0 || headID     > MAX_HEAD     ? (rand()%MAX_HEAD)     +1 : headID;
+    mWeaponID   = weaponID   <= 0 || weaponID   > MAX_WEAPON   ? (rand()%MAX_WEAPON)   +1 : weaponID;
+    mMovementID = movementID <= 0 || movementID > MAX_MOVEMENT ? (rand()%MAX_MOVEMENT) +1 : movementID;
     mName       = (TelaString("Robot_") + robots).c_str();
     robots++;
 }
