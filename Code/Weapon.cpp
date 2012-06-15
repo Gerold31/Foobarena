@@ -94,6 +94,7 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             const float ViewDirY =  LookupTables::Angle16ToCos[Pitch];
             const VectorT ViewDir(ViewDirY*LookupTables::Angle16ToSin[Heading], ViewDirY*LookupTables::Angle16ToCos[Heading], ViewDirZ);
 
+            /*
             //create smoking barrel effect
             std::map<std::string, std::string> props;
             props["classname"] = "Smoke";
