@@ -427,8 +427,8 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
                                 //create smoking barrel effect
                                 std::map<std::string, std::string> props;
                                 props["classname"] = "Smoke";
-                                props["StartSize"] = TelaString(mDamage).c_str();
-                                props["EndSize"] = TelaString(10*mDamage).c_str();
+                                props["StartSize"] = TelaString(10*mDamage).c_str();
+                                props["EndSize"] = TelaString(100*mDamage).c_str();
                                 props["LifeTime"] = TelaString(0.1/mFirerate).c_str();
                                 props["ParticleSpawnTime"] = "0.01";
                                 props["Color"] = "127 127 127 255";

@@ -31,6 +31,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #include "MaterialSystem/Renderer.hpp"
 #include "Math3D/Matrix.hpp"
 #include "SceneGraph/Node.hpp"
+#include "File.hpp"
 
 extern "C"
 {
@@ -89,10 +90,39 @@ EntRobotSpawnerT::EntRobotSpawnerT(const EntityCreateParamsT& Params)
                                        0,       // ActiveWeaponSequNr
                                        0.0))    // ActiveWeaponFrameNr)
 {
+    mScore[0] = NULL;
+    mScore[1] = NULL;
+    mScore[2] = NULL;
+    mScore[3] = NULL;
+
+    srand(GetTickCount());
 }
 
 void EntRobotSpawnerT::Think(float /*FrameTime*/, unsigned long ServerFrameNr)
 {
+    if(!mScore[0])
+    {
+        File *f = new File("Games/Foobarena/Models/Robot/scores.cfg");
+        f->open();
+
+        mScore[0] = new int[MAX_TORSO];
+        mScore[1] = new int[MAX_HEAD];
+        mScore[2] = new int[MAX_WEAPON];
+        mScore[3] = new int[MAX_MOVEMENT];
+
+        for(int i=1; i<=MAX_TORSO; i++)
+            mScore[0][i-1] = f->getInt(TelaString("torso") + i);
+
+        for(int i=1; i<=MAX_HEAD; i++)
+            mScore[1][i-1] = f->getInt(TelaString("head") + i);
+
+        for(int i=1; i<=MAX_WEAPON; i++)
+            mScore[2][i-1] = f->getInt(TelaString("weapon") + i);
+
+        for(int i=1; i<=MAX_MOVEMENT; i++)
+            mScore[3][i-1] = f->getInt(TelaString("movement") + i);
+
+    }
     for(int i=0; i<mRobotsToSpawn.size(); i++)
     {
         Vector3dT pos;
@@ -116,29 +146,42 @@ int EntRobotSpawnerT::spawnRobot(lua_State *l)
     EntRobotSpawnerT* Ent=(EntRobotSpawnerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
 
     Ent->mRobotsToSpawn.push_back(new RobotInfoT(luaL_checknumber(l, 2), luaL_checknumber(l, 3), luaL_checknumber(l, 4), luaL_checknumber(l, 5)));
-    return 0;
+
+
+    lua_pushinteger(l, Ent->getScore());
+    lua_pushstring(l, Ent->mRobotsToSpawn.back()->mName.c_str());
+
+    return 2;
 }
 
 
 EntRobotSpawnerT::RobotInfoT::RobotInfoT(int torsoID, int headID, int weaponID, int movementID)
 {
-    mTorsoID    = torsoID    < 0 ? (rand()%MAX_TORSO)    +1 : torsoID;
-    mHeadID     = headID     < 0 ? (rand()%MAX_HEAD)     +1 : headID;
-    mWeaponID   = weaponID   < 0 ? (rand()%MAX_WEAPON)   +1 : weaponID;
-    mMovementID = movementID < 0 ? (rand()%MAX_MOVEMENT) +1 : movementID;
+    static int robots = 0;
+    mTorsoID    = torsoID    < 0 || torsoID    > MAX_TORSO    ? (rand()%MAX_TORSO)    +1 : torsoID;
+    mHeadID     = headID     < 0 || headID     > MAX_HEAD     ? (rand()%MAX_HEAD)     +1 : headID;
+    mWeaponID   = weaponID   < 0 || weaponID   > MAX_WEAPON   ? (rand()%MAX_WEAPON)   +1 : weaponID;
+    mMovementID = movementID < 0 || movementID > MAX_MOVEMENT ? (rand()%MAX_MOVEMENT) +1 : movementID;
+    mName       = (TelaString("Robot_") + robots).c_str();
+    robots++;
 }
 
 map<string, string> EntRobotSpawnerT::RobotInfoT::toProperties()
 {
-    static int robots = 0;
     map<string, string> props;
     props["classname"] = "Robot";
-    props["name"]      = TelaString("Robot_") + robots;
+    props["name"]      = mName.c_str();
     props["TorsoID"]   = TelaString(mTorsoID);
     props["HeadID"]    = TelaString(mHeadID);
     props["WeaponID"]  = TelaString(mWeaponID);
     props["MovementID"]= TelaString(mMovementID);
-    robots++;
     return props;
 }
 
+int EntRobotSpawnerT::getScore()
+{
+    return mScore[0][mRobotsToSpawn.back()->mTorsoID-1] +
+           mScore[1][mRobotsToSpawn.back()->mHeadID-1] +
+           mScore[2][mRobotsToSpawn.back()->mWeaponID-1] +
+           mScore[3][mRobotsToSpawn.back()->mMovementID-1];
+}

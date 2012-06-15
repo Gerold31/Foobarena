@@ -90,6 +90,9 @@ const luaL_Reg MethodsList[]=
     { "printHUD",EntHumanPlayerT::print },
     { "giveAmmo",EntHumanPlayerT::giveAmmo},
     { "getAmmo", EntHumanPlayerT::getAmmo},
+    { "updateScore", EntHumanPlayerT::updateScore},
+    { "getHealth", EntHumanPlayerT::getHealth},
+    { "setHealth", EntHumanPlayerT::setHealth},
  // { "__tostring", toString },
     { NULL, NULL }
 };
@@ -136,6 +139,7 @@ EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
       TimeForLightSource(0.0),
       GuiHUD(NULL)
 {
+    mDeadTimer = 0;
     // We can only hope that 'Origin' is a nice place for a "Frozen Spectator"...
 
     // Because 'StateOfExistance==StateOfExistance_FrozenSpectator', we mis-use the 'Velocity' member variable a little
@@ -450,11 +454,11 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 }
 
-
+                /*
                 // Check if any key for changing the current weapon was pressed.
                 ArrayT<char> SelectableWeapons;
 
-                /*switch (Keys >> 28)
+                switch (Keys >> 28)
                 {
 
                     case 0: break;  // No weapon slot was selected for changing the weapon.
@@ -678,7 +682,12 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
             case StateOfExistance_Dead:
             {
-                // @todo end game
+
+                cf::GuiSys::GuiI *mainMenu = cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/MainMenu/MainMenu_main.cgui", true);
+                if(mainMenu)
+                {
+                    mainMenu->CallLuaFunc("OnPlayerDead");
+                }
                 break;
             }
 
@@ -761,7 +770,7 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
                 for (char Nr=0; Nr<15; Nr++) State.HaveAmmo         [Nr]=0;   // IMPORTANT: Do not clear the frags value in 'HaveAmmo[AMMO_SLOT_FRAGS]'!
                 for (char Nr=0; Nr<32; Nr++) State.HaveAmmoInWeapons[Nr]=0;
-                State.HaveAmmo[0] = 60;
+                State.HaveAmmo[0] = 84;
                 State.HaveAmmoInWeapons[0] = 6;
                 break;
             }
@@ -887,11 +896,11 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
             switch (State.StateOfExistance)
             {
                 case StateOfExistance_Dead:
-                    HUD_Font1.Print(50, 1024/2-4, 800.0f, 600.0f, 0x00FF0000, "You're dead.");
+                    HUD_Font1.Print(50, 1024/2-4, 800.0f, 600.0f, 0x00FF0000, "You're dead, press ESC to Quit");
                     break;
 
                 case StateOfExistance_FrozenSpectator:
-                    HUD_Font1.Print(50, 1024/2+16, 800.0f, 600.0f, 0x00FF0000, "Press FIRE (left mouse button) to respawn!");
+                    HUD_Font1.Print(200, 300, 800.0f, 600.0f, 0x00FF0000, "Press FIRE (left mouse button) to respawn!");
                     break;
             }
 
@@ -913,7 +922,7 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
         if (GuiHUD==NULL) GuiHUD=cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/HUD_main.cgui", true);
 
         // Decide whether the GuiHUD should be drawn at all.
-        const bool ActivateHUD=State.StateOfExistance==StateOfExistance_Alive || State.StateOfExistance==StateOfExistance_Dead;
+        const bool ActivateHUD=State.StateOfExistance==StateOfExistance_Alive;
 
         // GuiHUD could still be NULL, e.g. if the HUD.cgui file could not be found, or if there was a parse error.
         if (GuiHUD!=NULL) GuiHUD->Activate(ActivateHUD);
@@ -982,7 +991,7 @@ int EntHumanPlayerT::giveAmmo(lua_State *l)
 {
     EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
 
-    Ent->State.HaveAmmo[Ent->State.ActiveWeaponSlot]+=luaL_checkinteger(l, 2);
+    Ent->State.HaveAmmo[Ent->State.ActiveWeaponSlot] += luaL_checkinteger(l, 2);
     return 0;
 }
 
@@ -993,4 +1002,35 @@ int EntHumanPlayerT::getAmmo(lua_State *l)
 
     lua_pushinteger(l, Ent->State.HaveAmmo[Ent->State.ActiveWeaponSlot]);
     return 1;
+}
+
+
+int EntHumanPlayerT::updateScore(lua_State *l)
+{
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+    if(!Ent->GuiHUD) Ent->GuiHUD=cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/HUD_main.cgui", true);
+    if(Ent->GuiHUD)
+    {
+        Ent->GuiHUD->CallLuaFunc("UpdateScore", "i", luaL_checkinteger(l, 2));
+    }
+    return 0;
+}
+
+int EntHumanPlayerT::getHealth(lua_State *l)
+{
+
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+
+    lua_pushinteger(l, Ent->State.Health);
+    return 1;
+}
+
+int EntHumanPlayerT::setHealth(lua_State *l)
+{
+    EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
+
+    Ent->State.Health = luaL_checkinteger(l, 2);
+    return 0;
 }

@@ -118,7 +118,7 @@ EntRobotPartT::EntRobotPartT(const EntityCreateParamsT& Params)
 
 EntRobotPartT::~EntRobotPartT()
 {
-    Console->DevPrint("EntRobotPartT::~EntRobotPartT()\n");
+//    Console->DevPrint("EntRobotPartT::~EntRobotPartT()\n");
     mModel = NULL;
 }
 

@@ -72,6 +72,9 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     static int print(lua_State *l);
     static int giveAmmo(lua_State *l);
     static int getAmmo(lua_State *l);
+    static int updateScore(lua_State *l);
+    static int getHealth(lua_State *l);
+    static int setHealth(lua_State *l);
 
     private:
 
@@ -89,6 +92,7 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     cf::GuiSys::GuiI* GuiHUD;                   ///< The HUD GUI for this local human player entity.
 
     string mHUDText;
+    double mDeadTimer;
 };
 
 #endif

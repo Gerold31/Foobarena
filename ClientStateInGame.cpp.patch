@@ -1,11 +1,16 @@
---- ../../Ca3DE/Client/ClientStateInGame.cpp.old	Fri Jun 15 13:52:34 2012
-+++ ../../Ca3DE/Client/ClientStateInGame.cpp	Fri Jun 15 12:38:24 2012
-@@ -861,7 +861,7 @@
-                 wxGetKeyState(wxKeyCode(','))  ) PlayerCommand.Keys|=PCK_StrafeLeft;     // ,        Strafe left
-             if (wxGetKeyState(wxKeyCode('D')) ||                                         // D        Strafe right
-                 wxGetKeyState(wxKeyCode('.'))  ) PlayerCommand.Keys|=PCK_StrafeRight;    // .        Strafe right
--            if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Fire1;          // R        Fire/Respawn
-+            if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Reload;          // R        Fire/Respawn
-             if (wxGetKeyState(WXK_RETURN) ||                                             // RETURN   Use
-                 wxGetKeyState(WXK_NUMPAD_ENTER)) PlayerCommand.Keys|=PCK_Use;            // ENTER    Use
-             if (wxGetKeyState(WXK_LEFT        )) PlayerCommand.Keys|=PCK_TurnLeft;       // Left     Turn left
+230c230
+<             Console->DevWarning("Should replace the static string \"DeathMatch\" with the true GameName here!\n");
+---
+>             Console->DevWarning("Should replace the static string \"Foobarena\" with the true GameName here!\n");
+232c232
+<             cf::GuiSys::GuiI* ChatInputGui=cf::GuiSys::GuiMan->Find(std::string("Games/")+/*GameName*/"DeathMatch"+"/GUIs/ChatInput.cgui", true);
+---
+>             cf::GuiSys::GuiI* ChatInputGui=cf::GuiSys::GuiMan->Find(std::string("Games/")+/*GameName*/"Foobarena"+"/GUIs/ChatInput.cgui", true);
+664c664
+<                 cf::GuiSys::GuiMan->Find(std::string("Games/")+/*GameName*/"DeathMatch"+"/GUIs/Console.cgui", true)->Activate(false);    // Close console on map change.
+---
+>                 cf::GuiSys::GuiMan->Find(std::string("Games/")+/*GameName*/"Foobarena"+"/GUIs/Console.cgui", true)->Activate(false);    // Close console on map change.
+864c864
+<             if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Fire1;          // R        Fire/Respawn
+---
+>             if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Reload;          // R        Fire/Respawn

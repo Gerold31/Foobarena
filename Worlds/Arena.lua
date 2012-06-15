@@ -2,7 +2,9 @@
 wait=coroutine.yield;
 Console.Print("Arena.lua script loaded.\n");
 
-maxRobots = 4;
+maxRobots = 6;
+
+robots = {};
 
 function Game()
 	wait(1);
@@ -14,10 +16,13 @@ function Game()
 	local robotsPerRound = 2
 	local robotsToSpawn = 0;
 	
+	local score = 0;
+	
+	
 	while true do
 		if countRobots() == 0 and robotsToSpawn == 0 then
 			if timer == 5 then
-				Player1:giveAmmo(30);
+				Player1:giveAmmo(60);
 			end
 			if timer > 0 then
 				Player1:printHUD("Round " .. round+1 .. " starts in " .. timer);
@@ -37,10 +42,29 @@ function Game()
 			
 			
 			local robots = math.min(maxRobots - countRobots(), robotsToSpawn);
-			Console.Print("min(" .. maxRobots - countRobots() .. ", " .. robotsToSpawn .. ")==" .. robots .. "\n");
 			spawnRobots(robots);
 			robotsToSpawn = robotsToSpawn - robots;
+			
+			
 		end
+		
+		for k,v in pairs(robots) do 
+			if findRobot(k) == false then
+				if v~=nil then
+					Console.Print("killed Robot " .. k .. "\n");
+					score = score + v;
+				end
+				Console.Print("Robot " .. k .. " is dead\n");
+				robots[k] = nil;
+			end
+		end
+		
+		Player1:updateScore(score);
+		
+		if Player1:getHealth() < 100 then
+			Player1:setHealth(Player1:getHealth() + 1);
+		end
+		
 		wait(1);
 	end
 end
@@ -65,17 +89,30 @@ function spawnRobots(robots)
 end
 
 function spawnRobot(i)
+	local score, name;
 	if i == 1 then
-		RobotSpawner_001:spawnRobot(-1, -1, -1, -1);
+		score, name = RobotSpawner_001:spawnRobot(-1, -1, -1, -1);
 	elseif i == 2 then
-		RobotSpawner_002:spawnRobot(-1, -1, -1, -1);
+		score, name = RobotSpawner_002:spawnRobot(-1, -1, -1, -1);
 	elseif i == 3 then
-		RobotSpawner_003:spawnRobot(-1, -1, -1, -1);
+		score, name = RobotSpawner_003:spawnRobot(-1, -1, -1, -1);
 	else
-		RobotSpawner_004:spawnRobot(-1, -1, -1, -1);
+		score, name = RobotSpawner_004:spawnRobot(-1, -1, -1, -1);
 	end
+	robots[name] = score;
+	Console.Print("Create Robot: " .. name .. " with " .. score .. " score\n");
 end
 
+function findRobot(name)
+	for k, v in pairs(_G) do                      -- Iterate over all global variables.
+		if type(v)=="table" and v.GetName then    -- Implement a very simple type check.
+			if(v:GetName() == name) then
+				return true;
+			end
+		end
+	end
+	return false;
+end
 
 thread(Game);
 

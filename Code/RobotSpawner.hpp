@@ -38,8 +38,8 @@ public:
     public:
         RobotInfoT(int torsoID = -1, int headID = -1, int weaponID = -1, int movementID = -1);
         map<string, string> toProperties();
-    private:
         int mTorsoID, mHeadID, mWeaponID, mMovementID;
+        string mName;
     };
 
     EntRobotSpawnerT(const EntityCreateParamsT& Params);
@@ -54,6 +54,8 @@ public:
 
 protected:
     vector<RobotInfoT *> mRobotsToSpawn;
+    int *mScore[4];
+    int getScore();
 };
 
 #endif
