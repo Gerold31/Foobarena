@@ -538,8 +538,15 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
         mPart.at(0)->State.Health -= min(char(0.4*Amount), mPart.at(0)->State.Health);
         if(part->State.Health == 0)
         {
-            GameWorld->RemoveEntity(part->ID);
-            part = NULL;
+            for(int i=0; i<mPart.size(); i++)
+            {
+                if(!mPart.at(i)) continue;
+                if(mPart.at(i) == part)
+                {
+                    GameWorld->RemoveEntity(mPart.at(i)->ID);
+                    mPart[i] = NULL;
+                }
+            }
         }
     }
 }

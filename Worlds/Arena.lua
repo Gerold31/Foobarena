@@ -2,7 +2,7 @@
 wait=coroutine.yield;
 Console.Print("Arena.lua script loaded.\n");
 
-maxRobots = 6;
+maxRobots = 5;
 
 robots = {};
 
@@ -13,7 +13,7 @@ function Game()
 	
 	local round = 0;
 	
-	local robotsPerRound = 2
+	local robotsPerRound = 2;
 	local robotsToSpawn = 0;
 	
 	local score = 0;
@@ -41,21 +41,25 @@ function Game()
 			Player1:printHUD("Round " .. round .. ": " .. robotsToSpawn + countRobots() .. " robots left");
 			
 			
-			local robots = math.min(maxRobots - countRobots(), robotsToSpawn);
-			spawnRobots(robots);
-			robotsToSpawn = robotsToSpawn - robots;
+			local count = math.min(maxRobots - countRobots(), robotsToSpawn);
+			spawnRobots(count);
+			robotsToSpawn = robotsToSpawn - count;
 			
 			
 		end
 		
 		for k,v in pairs(robots) do 
-			if findRobot(k) == false then
-				if v~=nil then
-					Console.Print("killed Robot " .. k .. "\n");
-					score = score + v;
+			if k~=nil then
+				Console.Print(k ..  " | " .. v);
+				if findRobot(k) == false then
+					Console.Print("false\n");
+					if v~=nil then
+						score = score + v;
+					end
+					robots[k] = nil;
+				else
+					Console.Print("true\n");
 				end
-				Console.Print("Robot " .. k .. " is dead\n");
-				robots[k] = nil;
 			end
 		end
 		
