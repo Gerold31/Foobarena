@@ -187,9 +187,8 @@ EntHumanPlayerT::~EntHumanPlayerT()
 
 void EntHumanPlayerT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& ImpactDir)
 {
-    Console->DevPrint("EntHumanPlayerT::TakeDamage\n");
-    State.Health -= Amount;
-    if(State.Health < 0)
+    State.Health -= min(Amount, State.Health);
+    if(State.Health == 0)
         State.StateOfExistance = StateOfExistance_Dead;
 }
 
@@ -679,100 +678,16 @@ void EntHumanPlayerT::Think(float FrameTime_BAD_DONT_USE, unsigned long ServerFr
 
             case StateOfExistance_Dead:
             {
-                bool         DummyOldWishJump=false;
-                const double OldOriginZ      =State.Origin.z;
-                const float  OldModelFrameNr =State.ModelFrameNr;
-
-                if (m_RigidBody->isInWorld())
-                    PhysicsWorld->RemoveRigidBody(m_RigidBody);
-
-                Physics::MoveHuman(State, ClipModel, PlayerCommands[PCNr].FrameTime, VectorT(), VectorT(), false, DummyOldWishJump, 0.0, GameWorld->GetClipWorld());
-
-                // We want to lower the view of the local client after it has been killed (in order to indicate the body collapse).
-                // Unfortunately, the problem is much harder than just decreasing the 'State.Origin.z' in some way, because
-                // a) other clients still need the original height for properly drawing the death sequence (from 3rd person view), and
-                // b) the corpse that we create on leaving this StateOfExistance must have the proper height, too.
-                // Therefore, we decrease the 'State.Origin.z', but "compensate" the 'State.Dimensions', such that the *absolute*
-                // coordinates of our bounding box (obtained by "State.Origin plus State.Dimensions") remain constant.
-                // This way, we can re-derive the proper height in both cases a) and b).
-                const double Collapse=2000.0*PlayerCommands[PCNr].FrameTime;
-
-                if (State.Dimensions.Min.z+Collapse<-100.0)
-                {
-                    State.Origin.z        -=Collapse;
-                    State.Dimensions.Min.z+=Collapse;
-                    State.Dimensions.Max.z+=Collapse;
-                    State.Bank            +=(unsigned short)(PlayerCommands[PCNr].FrameTime*36000.0);
-                }
-
-                // Advance frame time of model sequence.
-				/*
-                const CafuModelT*                PlayerModel=cf::GameSys::GameImplT::GetInstance().GetPlayerModel(State.ModelIndex);
-                IntrusivePtrT<AnimExprStandardT> StdAE      =PlayerModel->GetAnimExprPool().GetStandard(State.ModelSequNr, State.ModelFrameNr);
-
-                StdAE->SetForceLoop(false);
-                StdAE->AdvanceTime(PlayerCommands[PCNr].FrameTime);
-                State.ModelFrameNr=StdAE->GetFrameNr();
-				*/
-				
-                // We entered this state after we died.
-                // Now leave it only after we have come to a complete halt, and the death sequence is over.
-                if (OldOriginZ>=State.Origin.z && fabs(State.Velocity.x)<0.1 && fabs(State.Velocity.y)<0.1 && fabs(State.Velocity.z)<0.1 && OldModelFrameNr==State.ModelFrameNr)
-                {
-                    if (ThinkingOnServerSide)
-                    {
-                        std::map<std::string, std::string> Props; Props["classname"]="corpse";
-
-                        // Create a new "corpse" entity in the place where we died, or else the model disappears.
-                        unsigned long CorpseID=GameWorld->CreateNewEntity(Props, ServerFrameNr, VectorT());
-
-                        if (CorpseID!=0xFFFFFFFF)
-                        {
-                            BaseEntityT* Corpse=GameWorld->GetBaseEntityByID(CorpseID);
-
-                            Corpse->State=EntityStateT(State.Origin+VectorT(0.0, 0.0, State.Dimensions.Min.z+1728.8), VectorT(), BoundingBox3T<double>(Vector3dT()), State.Heading,
-                                                       0, 0, 0, 0, State.ModelIndex, State.ModelSequNr, State.ModelFrameNr, 0, 0, 0, 0,
-                                                       State.ActiveWeaponSlot, 0, 0.0);
-                        }
-                    }
-
-                    State.Velocity.y=State.Heading;
-                    State.Velocity.z=State.Bank;
-                    State.Dimensions=BoundingBox3T<double>(VectorT(400.0, 400.0, 100.0), VectorT(-400.0, -400.0, -1728.8));
-                    State.StateOfExistance=StateOfExistance_FrozenSpectator;
-                }
+                // @todo end game
                 break;
             }
 
             case StateOfExistance_FrozenSpectator:
             {
-				const float Pi          =3.14159265359f;
-                const float SecPerSwing =15.0f;
-                float       PC_FrameTime=PlayerCommands[PCNr].FrameTime;
-
-                if (m_RigidBody->isInWorld())
-                    PhysicsWorld->RemoveRigidBody(m_RigidBody);
-
-                // In this 'StateOfExistance' is the 'State.Velocity' unused - thus mis-use it for other purposes!
-                if (PC_FrameTime>0.05) PC_FrameTime=0.05f;  // Avoid jumpiness with very low FPS.
-                State.Velocity.x+=PC_FrameTime*2.0*Pi/SecPerSwing;
-                if (State.Velocity.x>6.3) State.Velocity.x-=2.0*Pi;
-
-                const float SwingAngle=float(sin(State.Velocity.x)*200.0);
-
-                State.Heading=(unsigned short)(State.Velocity.y+SwingAngle);
-                State.Bank   =(unsigned short)(State.Velocity.z-SwingAngle);
-
-                // TODO: We want the player to release the button between respawns in order to avoid permanent "respawn-flickering"
-                //       that otherwise may occur if the player keeps the button continuously pressed down.
-                //       These are the same technics that also apply to the "jump"-button.
-                if ((PlayerCommands[PCNr].Keys & PCK_Fire1)==0) break;  // "Fire" button not pressed.
-
                 const ArrayT<unsigned long>& AllEntityIDs=GameWorld->GetAllEntityIDs();
                 BaseEntityT*                 IPSEntity   =NULL;
                 VectorT                      OurNewOrigin;
                 unsigned long                EntityIDNr;
-
                 // The "Fire"-button was pressed. Now try to determine a free "InfoPlayerStart" entity for respawning there.
                 for (EntityIDNr=0; EntityIDNr<AllEntityIDs.Size(); EntityIDNr++)
                 {
@@ -1010,7 +925,9 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
         // for now to just do it in this place and in this way...
         if (GuiHUD!=NULL && ActivateHUD)
         {
-			GuiHUD->CallLuaFunc("UpdateCrosshairMaterial", "s", "Gui/CrossHair1");
+            GuiHUD->CallLuaFunc("UpdateCrosshairMaterial", "s", "Gui/CrossHair1");
+            GuiHUD->CallLuaFunc("UpdateHealth", "i", State.Health);
+            GuiHUD->CallLuaFunc("UpdateAmmo", "ii", State.HaveAmmoInWeapons[State.ActiveWeaponSlot], State.HaveAmmo[State.ActiveWeaponSlot]);
 
         }
 

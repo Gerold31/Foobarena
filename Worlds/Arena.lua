@@ -16,9 +16,11 @@ function Game()
 	
 	while true do
 		if countRobots() == 0 and robotsToSpawn == 0 then
+			if timer == 5 then
+				Player1:giveAmmo(30);
+			end
 			if timer > 0 then
 				Player1:printHUD("Round " .. round+1 .. " starts in " .. timer);
-				Player1:giveAmmo(200);
 				timer = timer - 1;
 				
 			elseif timer == 0 then

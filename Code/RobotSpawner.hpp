@@ -22,7 +22,7 @@ For support and more information about Cafu, visit us at <http://www.cafu.de>.
 #ifndef _ROBOTSPAWNER_HPP_
 #define _ROBOTSPAWNER_HPP_
 
-#include "BaseEntity.hpp"
+#include "../../BaseEntity.hpp"
 
 #include <string>
 #include <map>

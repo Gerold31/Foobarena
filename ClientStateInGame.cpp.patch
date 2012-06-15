@@ -1,0 +1,11 @@
+--- ../../Ca3DE/Client/ClientStateInGame.cpp.old	Fri Jun 15 13:52:34 2012
++++ ../../Ca3DE/Client/ClientStateInGame.cpp	Fri Jun 15 12:38:24 2012
+@@ -861,7 +861,7 @@
+                 wxGetKeyState(wxKeyCode(','))  ) PlayerCommand.Keys|=PCK_StrafeLeft;     // ,        Strafe left
+             if (wxGetKeyState(wxKeyCode('D')) ||                                         // D        Strafe right
+                 wxGetKeyState(wxKeyCode('.'))  ) PlayerCommand.Keys|=PCK_StrafeRight;    // .        Strafe right
+-            if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Fire1;          // R        Fire/Respawn
++            if (wxGetKeyState(wxKeyCode('R'))  ) PlayerCommand.Keys|=PCK_Reload;          // R        Fire/Respawn
+             if (wxGetKeyState(WXK_RETURN) ||                                             // RETURN   Use
+                 wxGetKeyState(WXK_NUMPAD_ENTER)) PlayerCommand.Keys|=PCK_Use;            // ENTER    Use
+             if (wxGetKeyState(WXK_LEFT        )) PlayerCommand.Keys|=PCK_TurnLeft;       // Left     Turn left

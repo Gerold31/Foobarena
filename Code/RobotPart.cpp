@@ -231,7 +231,6 @@ void EntRobotPartT::Deserialize(cf::Network::InStreamT& Stream, bool IsIniting)
     Stream >> State.ModelIndex;
     Stream >> State.ModelSequNr;
     Stream >> State.ModelFrameNr;
-
     Stream >> mModelName;
     Stream >> mCollisionModelName;
     if(!mModel)

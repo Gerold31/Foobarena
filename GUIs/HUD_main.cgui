@@ -1,7 +1,5 @@
 dofile("Games/Foobarena/GUIs/HUD_init.cgui");
 
-
-InfoFrags.NumFrags=0;
 FPS.oldTime=FPS:get("time");
 CrossHair.RotateCrosshair=false;
 
@@ -30,14 +28,8 @@ end
 
 
 -- This function is called from the Human Player entity code (currently once per frame).
-function UpdateHealthArmorFrags(Health, Armor, Frags)
+function UpdateHealth(Health)
     InfoHealth:set("text", " Health  "..Health);
-    InfoArmor :set("text", " Armor  "..Armor);
-    InfoFrags :set("text", " Frags  "..Frags);
-
-    -- Trigger a 360 rotation of the Frags counter whenever it increases.
-    if (Frags~=InfoFrags.NumFrags) then InfoFrags:interpolate("rotAngle", 0, 360, 500); end
-    InfoFrags.NumFrags=Frags;
 
     -- Set the text color of the Health counter linear to its value.
     if (Health>100) then Health=100; end;
@@ -47,13 +39,9 @@ end
 
 
 -- This function is called from the Human Player entity code (currently once per frame).
-function UpdateAmmoString(AmmoString)
-    if (#AmmoString==0) then
-        InfoAmmo:set("show", false);
-    else
-        InfoAmmo:set("show", true);
-        InfoAmmo:set("text", AmmoString);
-    end
+function UpdateAmmo(AmmoInWeapn, Ammo)
+	InfoAmmo:set("show", true);
+	InfoAmmo:set("text", AmmoInWeapn .. " / " .. Ammo);
 end
 
 

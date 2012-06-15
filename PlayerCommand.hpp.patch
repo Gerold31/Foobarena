@@ -1,0 +1,10 @@
+--- ../PlayerCommand.hpp.old	Fri Jun 15 13:55:44 2012
++++ ../PlayerCommand.hpp	Fri Jun 15 12:38:33 2012
+@@ -43,6 +43,7 @@
+ const unsigned long PCK_Fire1       =0x00001000;    // Primary   Fire (also used e.g. for "Respawn")
+ const unsigned long PCK_Fire2       =0x00002000;    // Secondary Fire
+ const unsigned long PCK_Use         =0x00004000;    // Use
++const unsigned long PCK_Reload      =0x00008000;    // Reload
+ // Bits 28-31 are reserved for selecting the weapon slot!
+ 
+ 

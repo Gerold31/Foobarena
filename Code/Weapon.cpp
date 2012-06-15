@@ -64,7 +64,7 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
                 state.ActiveWeaponSequNr =0;
                 state.ActiveWeaponFrameNr=0.0;
 
-                const char Amount=state.HaveAmmo[mWeaponId]>6 ? 6 : state.HaveAmmo[mWeaponId]; /// @todo use ammo slot instead of weapon slot?
+                const char Amount=state.HaveAmmo[mWeaponId]> (6-state.HaveAmmoInWeapons[mWeaponId]) ? (6-state.HaveAmmoInWeapons[mWeaponId]) : state.HaveAmmo[mWeaponId]; /// @todo use ammo slot instead of weapon slot?
 
                 state.HaveAmmoInWeapons[mWeaponId]+=Amount;
                 state.HaveAmmo         [mWeaponId]-=Amount; /// @todo use ammo slot instead of weapon slot?
@@ -107,10 +107,12 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             unsigned long id = Player->GameWorld->CreateNewEntity(props, ServerFrameNr, state.Origin);
             EntSmokeT *smoke = (EntSmokeT *)Player->GameWorld->GetBaseEntityByID(id);
 
-//            smoke->State.Origin = state.Origin + Vector3dT(130, 50, -90).GetRotY((-state.Pitch) *45.0f/8192.0).GetRotZ(state.Heading *45.0f/8192.0f);
+            smoke->State.Origin = state.Origin + Vector3dT(130, 50, -90).GetRotY(state.Pitch *45.0f/8192.0).GetRotZ(state.Heading *45.0f/8192.0f);
+            /*
             smoke->State.Origin[0] = float(state.Origin.x+ViewDir.x*400.0+130.0);
             smoke->State.Origin[1] = float(state.Origin.y+ViewDir.y*400.0);
             smoke->State.Origin[2] = float(state.Origin.z+ViewDir.z*400.0-90.0);
+            */
 
             // Update sound position and velocity.
             mShotSound->SetPosition(state.Origin+scale(ViewDir, 400.0));
@@ -127,6 +129,13 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
         case 7: // Idle 3
         case 1: // Fidget 1
         {
+            if (PlayerCommand.Keys & PCK_Reload && state.HaveAmmoInWeapons[mWeaponId] < 6)
+            {
+                state.ActiveWeaponSequNr =3;    // Reload
+                state.ActiveWeaponFrameNr=0.0;
+                break;
+            }
+
             // 1. First see if the magazine is empty and special action is required.
             if (!state.HaveAmmoInWeapons[mWeaponId])
             {
@@ -175,7 +184,7 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
                     {
                         BaseEntityT *ent = (BaseEntityT *)hitClipModel->GetUserData();
                         if(ent)
-                            ent->TakeDamage((BaseEntityT *)Player, 50, ViewDir);
+                            ent->TakeDamage((BaseEntityT *)Player, 10, ViewDir);
                     }
                 }
                 break;

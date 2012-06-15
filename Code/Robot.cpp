@@ -326,7 +326,7 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
             movementCount++;
     }
 
-    if(mPart.at(0)->State.Health > 0)
+    if(mPart.at(0)->State.Health != 0)
     {
         Vector3dT dir = mTarget->State.Origin - State.Origin;
 
@@ -534,37 +534,16 @@ void EntRobotT::TakeDamage(BaseEntityT* Entity, char Amount, const VectorT& Impa
 {
     if(isTorso)
     {
-        // 60% damage to torso, rest to the other parts
-        part->State.Health -= 0.6* Amount;
-        int damage = 0.4 * Amount/ mPart.size();
-        for(int i=1; i<mPart.size(); i++)
-        {
-            if(!mPart.at(i)) continue;
-            mPart.at(i)->State.Health -= damage;
-            // do not destroy part
-            if(mPart.at(i)->State.Health < 1)
-                mPart.at(i)->State.Health = 1;
-        }
+        part->State.Health -= min(Amount, part->State.Health);
     }else
     {
         // 60% damage to part, rest to torso
-        part->State.Health -= 0.6*Amount;
-        mPart.at(0)->State.Health -= 0.4*Amount;
-        if(part->State.Health <= 0)
+        part->State.Health -= min(0.6*Amount, part->State.Health);
+        mPart.at(0)->State.Health -= min(0.4*Amount, mPart.at(0)->State.Health);
+        if(part->State.Health == 0)
         {
-            /// @todo add some smoke effects
-            /// @todo create ridgit Body and accelerate in ImpactDir
-            // find part;
-            for(int i=1; i<mPart.size(); i++)
-            {
-                if(!mPart.at(i)) continue;
-                if(mPart.at(i) == part)
-                {
-                    GameWorld->RemoveEntity(mPart.at(i)->ID);
-                    mPart[i] = NULL;
-                    break;
-                }
-            }
+            GameWorld->RemoveEntity(part->ID);
+            part = NULL;
         }
     }
 }

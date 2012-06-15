@@ -11,10 +11,6 @@ Background=gui:new("WindowT", "Background");
 
 InfoHealth=gui:new("WindowT", "InfoHealth");
 
-InfoArmor=gui:new("WindowT", "InfoArmor");
-
-InfoFrags=gui:new("WindowT", "InfoFrags");
-
 InfoAmmo=gui:new("WindowT", "InfoAmmo");
 
 FPS=gui:new("WindowT", "FPS");
@@ -32,10 +28,6 @@ gui:SetRootWindow(Background);
 -- ***************************
 
 Background:AddChild(InfoHealth);
-
-Background:AddChild(InfoArmor);
-
-Background:AddChild(InfoFrags);
 
 Background:AddChild(InfoAmmo);
 
@@ -56,32 +48,11 @@ function Background:OnInit()
 end
 
 function InfoHealth:OnInit()
-    self:set("rect", 5, 430, 70, 20);
-    self:set("backColor", 0, 0.25, 0.7, 0.4);
-    self:set("borderWidth", 0.5);
-    self:set("borderColor", 0.7, 0.8, 0.9, 1);
-    self:set("text", " Health");
-    self:set("textScale", 0.25);
-    self:set("textAlignVer", 2);
-end
-
-function InfoArmor:OnInit()
     self:set("rect", 5, 455, 70, 20);
     self:set("backColor", 0, 0.25, 0.7, 0.4);
     self:set("borderWidth", 0.5);
     self:set("borderColor", 0.7, 0.8, 0.9, 1);
-    self:set("text", " Armor");
-    self:set("textScale", 0.25);
-    self:set("textColor", 0.51, 0.8, 1, 1);
-    self:set("textAlignVer", 2);
-end
-
-function InfoFrags:OnInit()
-    self:set("rect", 95, 455, 80, 20);
-    self:set("backColor", 0, 0.25, 0.7, 0.4);
-    self:set("borderWidth", 0.5);
-    self:set("borderColor", 0.7, 0.8, 0.9, 1);
-    self:set("text", " Frags");
+    self:set("text", " Health");
     self:set("textScale", 0.25);
     self:set("textColor", 0.51, 0.8, 1, 1);
     self:set("textAlignVer", 2);
