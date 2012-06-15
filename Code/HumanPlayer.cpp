@@ -139,7 +139,6 @@ EntHumanPlayerT::EntHumanPlayerT(const EntityCreateParamsT& Params)
       TimeForLightSource(0.0),
       GuiHUD(NULL)
 {
-    mDeadTimer = 0;
     // We can only hope that 'Origin' is a nice place for a "Frozen Spectator"...
 
     // Because 'StateOfExistance==StateOfExistance_FrozenSpectator', we mis-use the 'Velocity' member variable a little
@@ -847,7 +846,7 @@ void EntHumanPlayerT::Draw(bool FirstPersonView, float LodDist) const
     if (FirstPersonView)
     {
         // Draw "view" model of the weapon
-        if (State.HaveWeapons & (1 << State.ActiveWeaponSlot))     // Only draw the active weapon if we actually "have" it
+        if (State.HaveWeapons & (1 << State.ActiveWeaponSlot) && State.StateOfExistance == StateOfExistance_Alive)     // Only draw the active weapon if we actually "have" it
         {
             Vector3fT LgtPos(MatSys::Renderer->GetCurrentLightSourcePosition());
             Vector3fT EyePos(MatSys::Renderer->GetCurrentEyePosition());
@@ -896,11 +895,7 @@ void EntHumanPlayerT::PostDraw(float FrameTime, bool FirstPersonView)
             switch (State.StateOfExistance)
             {
                 case StateOfExistance_Dead:
-                    HUD_Font1.Print(50, 1024/2-4, 800.0f, 600.0f, 0x00FF0000, "You're dead, press ESC to Quit");
-                    break;
-
-                case StateOfExistance_FrozenSpectator:
-                    HUD_Font1.Print(200, 300, 800.0f, 600.0f, 0x00FF0000, "Press FIRE (left mouse button) to respawn!");
+                    HUD_Font1.Print(50, 300, 800.0f, 600.0f, 0x00FF0000, (TelaString("You're dead, Score: ") + mScore + "  press ESC to Quit").c_str());
                     break;
             }
 
@@ -1009,10 +1004,11 @@ int EntHumanPlayerT::updateScore(lua_State *l)
 {
     EntHumanPlayerT* Ent=(EntHumanPlayerT*)cf::GameSys::ScriptStateT::GetCheckedObjectParam(l, 1, TypeInfo);
 
+    Ent->mScore = luaL_checkinteger(l, 2);
     if(!Ent->GuiHUD) Ent->GuiHUD=cf::GuiSys::GuiMan->Find("Games/Foobarena/GUIs/HUD_main.cgui", true);
     if(Ent->GuiHUD)
     {
-        Ent->GuiHUD->CallLuaFunc("UpdateScore", "i", luaL_checkinteger(l, 2));
+        Ent->GuiHUD->CallLuaFunc("UpdateScore", "i", Ent->mScore);
     }
     return 0;
 }

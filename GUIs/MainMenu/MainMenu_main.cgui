@@ -17,20 +17,12 @@ function MainMenu:UpdateUI(WhoChangedState)
 	if (self.ClientState=="idle") then
         if (self.ServerState=="idle") then
             ButtonLoadMap:set("text", "Start Game");
-        else
-            --ButtonLoadMap:set("text", "Stop\nServer...");
-        end
-    elseif (self.ClientState=="connecting") then
-        if (self.ServerState=="idle") then
-            ButtonLoadMap:set("text", "Abort\nconnecting...");
-        else
-            ButtonLoadMap:set("text", "Quit Current\nGame");
         end
     else
         if (self.ServerState=="idle") then
-            ButtonLoadMap:set("text", "Quit Game");
+            ButtonLoadMap:set("text", "End Game");
         else
-            ButtonLoadMap:set("text", "Quit Game");
+            ButtonLoadMap:set("text", "End Game");
         end
     end
 	

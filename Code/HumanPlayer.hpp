@@ -61,8 +61,8 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     void getWorldTransform(btTransform& worldTrans) const;
     void setWorldTransform(const btTransform& worldTrans);
 
-    void Serialize(cf::Network::OutStreamT &Stream) const {BaseEntityT::Serialize(Stream); Stream << mHUDText;}
-    void Deserialize(cf::Network::InStreamT &Stream, bool IsIniting) {BaseEntityT::Deserialize(Stream, IsIniting); Stream >> mHUDText;}
+    void Serialize(cf::Network::OutStreamT &Stream) const {BaseEntityT::Serialize(Stream); Stream << mHUDText; Stream << mScore;}
+    void Deserialize(cf::Network::InStreamT &Stream, bool IsIniting) {BaseEntityT::Deserialize(Stream, IsIniting); Stream >> mHUDText; Stream >> mScore;}
 
 
     const cf::TypeSys::TypeInfoT* GetType() const;
@@ -92,7 +92,7 @@ class EntHumanPlayerT : public BaseEntityT, public btMotionState
     cf::GuiSys::GuiI* GuiHUD;                   ///< The HUD GUI for this local human player entity.
 
     string mHUDText;
-    double mDeadTimer;
+    uint32_t mScore;
 };
 
 #endif
