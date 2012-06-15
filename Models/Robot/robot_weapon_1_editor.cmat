@@ -22,6 +22,28 @@
 }
 
 
+"None__metal_spec_png"
+{
+    diffusemap metal_spec.png
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}
+
+
+"unnamed"
+{
+    diffusemap file-not-found
+    twoSided
+    polygonMode wireframe
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}
+
+
 "wire-frame"
 {
     diffusemap file-not-found

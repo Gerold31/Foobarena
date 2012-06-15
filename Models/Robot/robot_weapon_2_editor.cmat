@@ -8,3 +8,13 @@
     blue  ambientLightBlue
     meta_editorSave
 }
+
+
+"Material__metal_spec_png"
+{
+    diffusemap metal_spec.png
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+    meta_editorSave
+}

@@ -1,7 +1,20 @@
 Models/Robot/Robot_Movement_1
 {
+	specularmap metal_spec.png
+	diffusemap metal_diff.png
+
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
+}
+
+Models/Robot/Robot_Movement_1_black
+{
     diffusemap  ../../Textures/generic/_black_diff.png
-	lightmap    $lightmap
+
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
 }
 
 dofile("robot_movement_wheel_1_editor.cmat")

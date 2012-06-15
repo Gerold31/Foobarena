@@ -1,7 +1,11 @@
 Models/Robot/Robot_Torso_1
 {
-    diffusemap  ../../Textures/generic/_black_diff.png
-	lightmap    $lightmap
+	specularmap metal_spec.png
+	diffusemap metal_diff.png
+
+    red   ambientLightRed
+    green ambientLightGreen
+    blue  ambientLightBlue
 }
 
 dofile("robot_torso_1_editor.cmat")
