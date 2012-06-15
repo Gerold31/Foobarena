@@ -1,22 +1,6 @@
 dofile("Games/Foobarena/GUIs/HUD_init.cgui");
 
-FPS.oldTime=FPS:get("time");
 CrossHair.RotateCrosshair=false;
-
-
-function FPS:OnFrame()
-    local newTime=FPS:get("time");
-    local deltaTime=newTime-self.oldTime;
-
-    if (deltaTime<0.000001) then
-        self:set("text", " FPS  +inf");
-    else
-        self:set("text", string.format(" FPS  %.2f", 1/deltaTime));
-    end
-
-    FPS.oldTime=newTime;
-end
-
 
 function CrossHair:OnFrame()
     if (self.RotateCrosshair) then
@@ -41,7 +25,7 @@ end
 -- This function is called from the Human Player entity code (currently once per frame).
 function UpdateAmmo(AmmoInWeapn, Ammo)
 	InfoAmmo:set("show", true);
-	InfoAmmo:set("text", AmmoInWeapn .. " / " .. Ammo);
+	InfoAmmo:set("text", "Ammo: " .. AmmoInWeapn .. " / " .. Ammo);
 end
 
 
@@ -53,4 +37,8 @@ function UpdateCrosshairMaterial(MaterialName, Rotate)
     CrossHair:set("show", #MaterialName>0);
     CrossHair:set("backMaterial", MaterialName);
     CrossHair.RotateCrosshair=Rotate;
+end
+
+function UpdateScore(score)
+	Score:set("text", "Score: " .. score);
 end

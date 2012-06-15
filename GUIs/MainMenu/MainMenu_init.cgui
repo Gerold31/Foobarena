@@ -12,7 +12,7 @@ MainMenu=gui:new("WindowT", "MainMenu");
 ButtonQuit=gui:new("WindowT", "ButtonQuit");
 
 ButtonLoadMap=gui:new("WindowT", "ButtonLoadMap");
-Info=gui:new("WindowT", "Info");
+
 
 -- Set the GUIs root window.
 -- *************************
@@ -26,7 +26,7 @@ gui:SetRootWindow(MainMenu);
 MainMenu:AddChild(ButtonQuit);
 
 MainMenu:AddChild(ButtonLoadMap);
-MainMenu:AddChild(Info);
+
 
 -- Initialization of the window contents ("constructor code").
 -- ***********************************************************
@@ -35,44 +35,37 @@ function MainMenu:OnInit()
     self:set("rect", 0, 0, 640, 480);
     self:set("backColor", 0, 0, 0, 1);
     self:set("borderColor", 0, 0, 0, 1);
-    self:set("text", "MainMenu");
+    self:set("text", "Foobarena");
     self:set("textColor", 1, 1, 1, 1);
     self:set("textAlignHor", 2);
 
     gui:activate      (true);
     gui:setInteractive(true);
     gui:showMouse     (true);
-	gui:setFocus	  (MainMenu);
-	
-    Info:set("show", true);
+    gui:setFocus      (MainMenu);
 end
 
 function ButtonQuit:OnInit()
-    self:set("rect", 250, 245, 150, 60);
+    self:set("rect", 40, 400, 85, 40);
     self:set("backColor", 0, 0, 0, 0.5);
     self:set("borderWidth", 5);
     self:set("borderColor", 1, 0, 0, 0);
     self:set("text", "Quit");
+    self:set("textScale", 0.6);
     self:set("textColor", 1, 1, 1, 1);
     self:set("textAlignHor", 2);
     self:set("textAlignVer", 2);
 end
 
 function ButtonLoadMap:OnInit()
-    self:set("rect", 220, 135, 225, 60);
+    self:set("rect", 440, 400, 160, 40);
     self:set("backColor", 0, 0, 0, 0.5);
     self:set("borderWidth", 5);
     self:set("borderColor", 1, 0, 0, 0);
-    self:set("text", "Load Map");
+    self:set("text", "Start Game");
+    self:set("textScale", 0.6);
     self:set("textColor", 1, 1, 1, 1);
-end
-
-function Info:OnInit()
-    self:set("rect", 0, 0, 225, 60);
-    self:set("backColor", 0, 0, 0, 0.5);
-    self:set("borderWidth", 5);
-    self:set("borderColor", 1, 0, 0, 0);
-    self:set("text", "");
-    self:set("textColor", 1, 1, 1, 1);
+    self:set("textAlignHor", 2);
+    self:set("textAlignVer", 2);
 end
 

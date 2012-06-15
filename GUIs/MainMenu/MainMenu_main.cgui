@@ -1,5 +1,7 @@
 dofile("Games/Foobarena/GUIs/MainMenu/MainMenu_init.cgui");
 
+gameQuit = false;
+
 function MainMenu:UpdateUI(WhoChangedState)
     -- Note that early during initialization, self.ClientState and self.ServerState can be nil.
     if (self.ClientState==nil) then self.ClientState="idle"; end
@@ -11,6 +13,27 @@ function MainMenu:UpdateUI(WhoChangedState)
         -- which is a good occasion to hide the main menu.
         gui:close();
     end
+	
+	if (self.ClientState=="idle") then
+        if (self.ServerState=="idle") then
+            ButtonLoadMap:set("text", "Start Game");
+        else
+            --ButtonLoadMap:set("text", "Stop\nServer...");
+        end
+    elseif (self.ClientState=="connecting") then
+        if (self.ServerState=="idle") then
+            ButtonLoadMap:set("text", "Abort\nconnecting...");
+        else
+            ButtonLoadMap:set("text", "Quit Current\nGame");
+        end
+    else
+        if (self.ServerState=="idle") then
+            ButtonLoadMap:set("text", "Quit Game");
+        else
+            ButtonLoadMap:set("text", "Quit Game");
+        end
+    end
+	
 end
 
 function OnClientStateChanged(NewState)
@@ -42,8 +65,11 @@ function MainMenu:OnKeyPress(Key)
     return false;       -- Return false to indicate that we did not process this key press.
 end
 
-function MainMenu:OnFrame()
-	Info:set("text", self.ClientState);
+function MainMenu:OnActivate()
+	if gameQuit == true then
+		QuitGame();
+		gameQuit = false;
+	end
 end
 
 function ButtonQuit:OnMouseEnter()
@@ -75,9 +101,11 @@ end
 function ButtonLoadMap:OnMouseButtonUp()
     -- Avoid that this function is called again (re-entrancy) during its wait() below.
 
-    
-    gui:thread(StartNewGame, "Arena");
-    return true;
+    if self:get("text") == "Start Game" then
+		gui:thread(StartNewGame, "Arena");
+	else
+		QuitGame();
+	end
 end
 
 function MainMenu:Quit()
@@ -114,4 +142,13 @@ function StartNewGame(WorldName)
 --	self:Quit();
 	--self.ClientState="ingame";
 	
+end
+
+function QuitGame()
+    if (MainMenu.ClientState~="idle") then ci.RunCommand("disconnect();"); end
+    if (MainMenu.ServerState~="idle") then ci.RunCommand("changeLevel();"); end
+end
+
+function OnPlayerDead()
+	gameQuit = true;
 end
