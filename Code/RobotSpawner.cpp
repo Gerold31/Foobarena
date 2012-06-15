@@ -40,6 +40,17 @@ extern "C"
     #include <lauxlib.h>
 }
 
+#ifndef WIN32
+#include <sys/timeb.h>
+#include <unistd.h>
+int GetTickCount()
+{
+    struct timeb tp;
+    ftime(&tp);
+    return time(NULL)*1000+tp.millitm;
+}
+#endif
+
 #define MAX_TORSO    3
 #define MAX_HEAD     2
 #define MAX_WEAPON   2
