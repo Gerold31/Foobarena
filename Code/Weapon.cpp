@@ -21,6 +21,7 @@
 #include "TelaString.hpp"
 
 #define PRINT_VAR(x) Console->DevPrint((TelaString(#x) + " :" + x + "\n").toString())
+#define PRINT_CHAR(x) Console->DevPrint((TelaString(#x) + " :" + (int)x + "\n").toString())
 
 #define BASE_PATH std::string("Games/Foobarena/")
 #define WEAPON_PATH(s) (BASE_PATH + "Models/Weapons/" + s + "/" + s + "_v.cmdl")
@@ -193,12 +194,13 @@ void WeaponT::ServerSide_Think(EntHumanPlayerT* Player, const PlayerCommandT& Pl
             // 3. If nothing else has happened, just choose another sequence number on sequence wrap.
             if (AnimSequenceWrap)
             {
-                const char RandomNumber=char(LookupTables::RandomUShort[PlayerCommand.Nr & 0xFFF]);
+                state.ActiveWeaponSequNr = 0;
+/*                const char RandomNumber=char(LookupTables::RandomUShort[PlayerCommand.Nr & 0xFFF]);
 
                      if (RandomNumber< 96) state.ActiveWeaponSequNr=0;  // Idle 1
                 else if (RandomNumber<192) state.ActiveWeaponSequNr=6;  // Idle 2
                 else if (RandomNumber<224) state.ActiveWeaponSequNr=7;  // Idle 3
-                else                       state.ActiveWeaponSequNr=1;  // Fidget 1
+                else                       state.ActiveWeaponSequNr=1;  // Fidget 1*/
 
                 state.ActiveWeaponFrameNr=0.0;
             }
