@@ -203,7 +203,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         }
 
         propsTorso["classname"]     ="RobotPart";
-        propsTorso["name"]          =TelaString("Torso") + Name;
         propsTorso["model"]         ="Models/Robot/robot_torso_" + torsoID + ".cmdl";
         propsTorso["collisionModel"]="Models/Robot/robot_torso_" + torsoID + ".cmap";
 
@@ -231,7 +230,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         propsHead["collisionModel"] ="Models/Robot/robot_head_" + headID + ".cmap";
         for(int i=0; i<mHeadCount; i++)
         {
-            propsHead["name"] = TelaString("Head") + i + Name;
             id = GameWorld->CreateNewEntity(propsHead, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = headHealth;
@@ -265,7 +263,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
         propsWeapon["collisionModel"]="Models/Robot/robot_weapon_" + weaponID + ".cmap";
         for(int i=0; i<mWeaponCount; i++)
         {
-            propsWeapon["name"] = TelaString("Weapon") + i + Name;
             id = GameWorld->CreateNewEntity(propsWeapon, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = weaponHealth;
@@ -295,7 +292,6 @@ void EntRobotT::Think(float FrameTime, unsigned long ServerFrameNr)
 
         for(int i=0; i<mMovementCount; i++)
         {
-            propsMovement["name"] = TelaString("Movement") + i + Name;
             id = GameWorld->CreateNewEntity(propsMovement, ServerFrameNr, State.Origin);
             part = (EntRobotPartT *)GameWorld->GetBaseEntityByID(id);
             part->State.Health = movementHealth;
