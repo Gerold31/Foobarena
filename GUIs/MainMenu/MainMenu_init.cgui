@@ -48,7 +48,7 @@ end
 function ButtonQuit:OnInit()
     self:set("rect", 40, 400, 85, 40);
     self:set("backColor", 0, 0, 0, 0.5);
-    self:set("borderWidth", 5);
+    self:set("borderWidth", 2);
     self:set("borderColor", 1, 0, 0, 0);
     self:set("text", "Quit");
     self:set("textScale", 0.6);
@@ -60,7 +60,7 @@ end
 function ButtonLoadMap:OnInit()
     self:set("rect", 440, 400, 160, 40);
     self:set("backColor", 0, 0, 0, 0.5);
-    self:set("borderWidth", 5);
+    self:set("borderWidth", 2);
     self:set("borderColor", 1, 0, 0, 0);
     self:set("text", "Start Game");
     self:set("textScale", 0.6);

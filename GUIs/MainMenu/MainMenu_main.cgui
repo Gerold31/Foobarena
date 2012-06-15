@@ -73,7 +73,7 @@ function MainMenu:OnActivate()
 end
 
 function ButtonQuit:OnMouseEnter()
-	self:set("borderColor", 1, 0, 0, 1);
+	self:set("borderColor", 0.8, 0.5, 0.2, 1);
 	--self:set("text", ">Quit");
 end
 
@@ -89,7 +89,7 @@ end
 
 
 function ButtonLoadMap:OnMouseEnter()
-	self:set("borderColor", 1, 0, 0, 1);
+	self:set("borderColor", 0.8, 0.5, 0.2, 1);
 	-- self:set("text", ">Quit");
 end
 
